@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DHL 閃電分揀員 - 專業打櫃版</title>
+    <title>DHL 閃電理貨員 - 專業打櫃版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -187,6 +187,20 @@
             z-index: 200;
         }
 
+        /* 說明視窗樣式 */
+        #explanation-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+        }
+
         .hidden { display: none !important; }
 
         .shake { animation: shake 0.4s ease-in-out; }
@@ -211,7 +225,7 @@
                     <div class="absolute bottom-4 w-full h-2 bg-red-600 border-y-2 border-black"></div>
                     <span class="font-black text-red-600 italic text-xl z-10">DHL</span>
                 </div>
-                <p class="text-gray-700 mb-6 font-bold">準確積載是物流尖兵的基本功！</p>
+                <p class="text-gray-700 mb-6 font-bold">準確裝載是物流專家的基本功！</p>
                 <div class="text-left text-sm space-y-4 text-gray-600 mb-8 font-medium">
                     <div class="flex items-center gap-3">
                         <span class="text-2xl">📦</span>
@@ -223,7 +237,7 @@
                     </div>
                 </div>
                 <button id="start-btn" class="w-full bg-dhl-red text-white py-5 rounded-2xl text-2xl font-bold shadow-[0_6px_0_#990000] active:translate-y-1 active:shadow-none transition-all">
-                    領取任務
+                    接下任務
                 </button>
             </div>
         </div>
@@ -248,44 +262,92 @@
             <div id="right-pallet" class="pallet-container"></div>
         </div>
 
+        <!-- 答案解析視窗 -->
+        <div id="explanation-overlay" class="hidden">
+            <div class="bg-white w-5/6 max-w-sm rounded-3xl border-4 border-black p-6 shadow-2xl transform scale-100">
+                <div id="result-indicator" class="text-2xl font-black mb-2 italic">CORRECT!</div>
+                <div class="h-1 bg-gray-200 mb-4"></div>
+                <h3 class="font-bold text-gray-500 text-xs uppercase mb-1">Knowledge Point</h3>
+                <p id="explanation-text" class="text-gray-800 font-medium leading-relaxed mb-6">
+                    這裡會顯示答案說明...
+                </p>
+                <button id="next-task-btn" class="w-full bg-dhl-red text-white py-4 rounded-xl font-black text-lg shadow-[0_4px_0_#990000] active:translate-y-1 active:shadow-none">
+                    繼續任務
+                </button>
+            </div>
+        </div>
+
         <!-- 結果畫面 -->
         <div id="result-screen" class="hidden w-full h-full flex flex-col items-center justify-center p-6 z-[300] absolute bg-[#FFCC00]">
             <h2 class="text-4xl font-black dhl-red mb-4 italic">任務完成！</h2>
             <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center border-4 border-black">
-                <p class="text-gray-600 mb-2 font-bold text-lg">積載效率評分：</p>
+                <p class="text-gray-600 mb-2 font-bold text-lg">裝載效率評分：</p>
                 <div id="final-score" class="text-7xl font-black mb-4 dhl-red">0</div>
                 <p id="rank-text" class="text-2xl font-bold text-yellow-600 mb-8"></p>
                 <button onclick="location.reload()" class="w-full bg-gray-800 text-white py-4 rounded-2xl font-bold mb-4">重新挑戰</button>
-                <button class="w-full bg-dhl-red text-white py-4 rounded-2xl font-bold shadow-[0_4px_0_#990000]">加入卓越團隊</button>
+                <button class="w-full bg-dhl-red text-white py-4 rounded-2xl font-bold shadow-[0_4px_0_#990000]">我想加入DHL</button>
             </div>
         </div>
     </div>
 
     <script>
         const questions = [
-            { q: "DHL 是在哪裡成立的？", left: "舊金山", right: "辛辛那提", correct: "left" },
-            { q: "DHL 主要的業務內容是什麼？", left: "國際快遞/供應鏈", right: "僅限餐飲外送", correct: "left" },
-            { q: "DHL 品牌名稱字母來自？", left: "創始人姓氏首字母", right: "快遞服務縮寫", correct: "left" },
-            { q: "GoGreen 的主要目標是？", left: "辦公室綠化", right: "物流零碳排放", correct: "right" },
-            { q: "DHL 的標誌顏色是？", left: "綠與黑", right: "黃與紅", correct: "right" },
-            { q: "DHL 全球營運總部在哪？", left: "德國波昂", right: "美國華盛頓", correct: "left" }
+            { 
+                q: "DHL 是在哪裡成立的？", 
+                left: "舊金山", 
+                right: "辛辛那提", 
+                correct: "left",
+                desc: "DHL於1969年在美國舊金山成立，辛辛那提則是目前DHL在美洲的主要轉運中心。"
+            },
+            { 
+                q: "DHL 主要的業務內容是什麼？", 
+                left: "國際快遞/供應鏈", 
+                right: "僅限餐飲外送", 
+                correct: "left",
+                desc: "DHL作為全球主要物流業者，DHL致力於提供高品質的物流服務，並運用最新科技、擁抱數位化，同時引領永續物流發展，實踐「連結人群，改善生活」的企業宗旨。"
+            },
+            { 
+                q: "DHL 品牌名稱字母來自？", 
+                left: "創始人姓氏首字母", 
+                right: "快遞服務縮寫", 
+                correct: "left",
+                desc: "DHL為Adrian Dalsey、Larry Hillblom和Robert Lynn成立的，品牌名稱取自三個人的姓氏首字母。"
+            },
+            { 
+                q: "集團目標是？", 
+                left: "辦公室綠化", 
+                right: "2050 淨零碳排", 
+                correct: "right",
+                desc: "DHL Group很重視環保，集團目標是在2050年能達到全集團淨零碳排(zero-emission)，目前也開始推行永續物流的相關服務。"
+            },
+            { 
+                q: "DHL 的標誌顏色是？", 
+                left: "綠與黑", 
+                right: "黃與紅", 
+                correct: "right",
+                desc: "DHL一開始的logo顏色是紅色和白色。隨著時間演進，品牌認為黃色更能展現「金黃色的速度」，才開始出現為人熟知的紅黃品牌色。"
+            }
         ];
 
         let score = 0;
         let timeLeft = 30;
         let gameActive = false;
+        let timerPaused = false;
         let currentPackage = null;
         let startX = 0;
         let currentX = 0;
         let questionIndex = 0;
 
         const startBtn = document.getElementById('start-btn');
+        const nextTaskBtn = document.getElementById('next-task-btn');
         const workArea = document.getElementById('work-area');
         const scoreDisplay = document.getElementById('score');
         const leftPallet = document.getElementById('left-pallet');
         const rightPallet = document.getElementById('right-pallet');
+        const expOverlay = document.getElementById('explanation-overlay');
 
         startBtn.addEventListener('click', startGame);
+        nextTaskBtn.addEventListener('click', hideExplanation);
 
         function startGame() {
             document.getElementById('start-screen').classList.add('hidden');
@@ -302,18 +364,23 @@
                     clearInterval(interval);
                     return;
                 }
-                timeLeft -= 0.1;
-                timerBar.style.width = (timeLeft / 30 * 100) + '%';
-                if (timeLeft <= 0) {
-                    endGame();
-                    clearInterval(interval);
+                if (!timerPaused) {
+                    timeLeft -= 0.1;
+                    timerBar.style.width = (timeLeft / 30 * 100) + '%';
+                    if (timeLeft <= 0) {
+                        endGame();
+                        clearInterval(interval);
+                    }
                 }
             }, 100);
         }
 
         function spawnQuestion() {
-            if (!gameActive) return;
-            const data = questions[questionIndex % questions.length];
+            if (!gameActive || questionIndex >= questions.length) {
+                if(questionIndex >= questions.length) endGame();
+                return;
+            }
+            const data = questions[questionIndex];
             
             document.getElementById('left-label').innerText = data.left;
             document.getElementById('right-label').innerText = data.right;
@@ -334,6 +401,7 @@
 
             // Touch events
             pkg.addEventListener('touchstart', (e) => {
+                if(timerPaused) return;
                 startX = e.touches[0].clientX;
                 currentX = startX;
             }, {passive: true});
@@ -342,6 +410,7 @@
             
             // Mouse events
             pkg.addEventListener('mousedown', (e) => {
+                if(timerPaused) return;
                 startX = e.clientX;
                 currentX = startX;
                 const onMouseMove = (me) => handleMove({touches: [{clientX: me.clientX}], preventDefault: () => {}});
@@ -356,7 +425,7 @@
         }
 
         function handleMove(e) {
-            if (!currentPackage) return;
+            if (!currentPackage || timerPaused) return;
             e.preventDefault();
             currentX = e.touches ? e.touches[0].clientX : e.clientX;
             const diff = currentX - startX;
@@ -364,7 +433,7 @@
         }
 
         function handleEnd(e) {
-            if (!currentPackage) return;
+            if (!currentPackage || timerPaused) return;
             const finalX = e.changedTouches ? e.changedTouches[0].clientX : currentX;
             const diff = finalX - startX;
             
@@ -378,9 +447,12 @@
         }
 
         function validate(choice) {
-            const isCorrect = choice === currentPackage.dataset.correct;
+            const data = questions[questionIndex];
+            const isCorrect = choice === data.correct;
             const targetPallet = choice === 'left' ? leftPallet : rightPallet;
             
+            timerPaused = true; // 暫停計時
+
             if (isCorrect) {
                 score += 20;
                 currentPackage.style.transition = 'all 0.5s cubic-bezier(0.5, 0, 0.5, 1)';
@@ -390,6 +462,7 @@
                 setTimeout(() => {
                     addStackedBox(targetPallet);
                 }, 350);
+                showExplanation(true, data.desc);
             } else {
                 score = Math.max(0, score - 10);
                 currentPackage.style.transition = 'all 0.6s ease-in';
@@ -397,16 +470,37 @@
                 currentPackage.style.opacity = '0';
                 document.body.classList.add('shake');
                 setTimeout(() => document.body.classList.remove('shake'), 400);
+                showExplanation(false, data.desc);
             }
 
             scoreDisplay.innerText = score;
-            questionIndex++;
+        }
+
+        function showExplanation(isCorrect, text) {
+            const indicator = document.getElementById('result-indicator');
+            const expText = document.getElementById('explanation-text');
+            
+            indicator.innerText = isCorrect ? "CORRECT!" : "INCORRECT";
+            indicator.className = isCorrect ? "text-2xl font-black mb-2 italic text-green-600" : "text-2xl font-black mb-2 italic text-red-600";
+            expText.innerText = text;
             
             setTimeout(() => {
-                if (currentPackage) currentPackage.remove();
-                currentPackage = null;
-                spawnQuestion();
+                expOverlay.classList.remove('hidden');
             }, 600);
+        }
+
+        function hideExplanation() {
+            expOverlay.classList.add('hidden');
+            if (currentPackage) currentPackage.remove();
+            currentPackage = null;
+            questionIndex++;
+            timerPaused = false;
+            
+            if (questionIndex >= questions.length) {
+                endGame();
+            } else {
+                spawnQuestion();
+            }
         }
 
         function addStackedBox(pallet) {
@@ -426,9 +520,9 @@
             document.getElementById('final-score').innerText = score;
             
             let rank = "需再加強";
-            if (score >= 120) rank = "🏆 特級打櫃大師";
-            else if (score >= 80) rank = "🚚 專業物流士";
-            else if (score >= 40) rank = "📦 實習操作員";
+            if (score >= 100) rank = "🏆 卓越打櫃大師";
+            else if (score >= 60) rank = "🚚 專業物流士";
+            else if (score >= 20) rank = "📦 實習理貨員";
             
             document.getElementById('rank-text').innerText = rank;
         }
