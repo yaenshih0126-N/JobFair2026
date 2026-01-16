@@ -285,13 +285,12 @@
                 <div id="final-score" class="text-7xl font-black mb-4 dhl-red">0</div>
                 <p id="rank-text" class="text-2xl font-bold text-yellow-600 mb-8"></p>
                 <button onclick="location.reload()" class="w-full bg-gray-800 text-white py-4 rounded-2xl font-bold mb-4">重新挑戰</button>
-        <!-- 加入卓越團隊按鈕 -->
-                <a href="https://careers.dhl.com/global/en" 
-                   target="_blank" 
-                   rel="noopener noreferrer"
-                   class="block w-full bg-dhl-red text-white py-4 rounded-2xl font-bold shadow-[0_4px_0_#990000] active:translate-y-1 active:shadow-none text-center no-underline transition-transform cursor-pointer">
+       <!-- 方案：使用 JavaScript 的強效跳轉 -->
+                <button id="join-team-btn" class="w-full bg-dhl-red text-white py-4 rounded-2xl font-bold shadow-[0_4px_0_#990000] active:translate-y-1 active:shadow-none text-center block transition-all">
                     加入卓越團隊
-                </a>
+                </button>
+                
+                <p class="text-[10px] text-gray-400 mt-4 italic">Tip: 若無法開啟，請檢查瀏覽器彈窗設定</p>
             </div>
         </div>
     </div>
@@ -535,4 +534,5 @@
     </script>
 </body>
 </html>
+
 
