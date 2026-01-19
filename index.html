@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DHL 金黃色速度的理貨員 - 專業打櫃版</title>
+    <title>DHL 閃電分揀員 - 專業打櫃版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -11,24 +11,34 @@
             font-family: 'Arial', sans-serif;
             overflow: hidden;
             touch-action: none;
+            height: 100vh;
+            width: 100vw;
         }
         .dhl-red { color: #D40000; }
         .bg-dhl-red { background-color: #D40000; }
         
         #game-container {
-            height: 100vh;
+            height: 100%;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
             position: relative;
         }
 
-        /* 傳送帶/工作區 */
+        /* 頂部資訊區 - 優化高度以騰出空間 */
+        header {
+            height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding-top: 15px;
+        }
+
+        /* 傳送帶/工作區 - 佔用中間大部空間並自動伸縮 */
         #work-area {
             flex-grow: 1;
             width: 100%;
-            height: 100%;
             position: relative;
             display: flex;
             align-items: center;
@@ -36,165 +46,133 @@
             z-index: 40;
         }
 
-        /* 改良版：DHL 黃色卡通紙箱 */
+        /* 縮小後的 DHL 紙箱，適配手機比例 */
         .package {
-            width: 280px;
-            min-height: 200px;
-            background: #FFCC00; /* DHL 經典黃 */
-            border: 4px solid #333; /* 卡通感黑邊 */
-            border-radius: 12px;
+            width: 220px; 
+            min-height: 160px; 
+            background: #FFCC00; 
+            border: 3px solid #333; 
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             position: absolute;
-            box-shadow: 10px 10px 0px rgba(0,0,0,0.1); /* 卡通式陰影 */
+            box-shadow: 6px 6px 0px rgba(0,0,0,0.1); 
             z-index: 100;
-            padding: 15px;
+            padding: 10px;
             text-align: center;
             pointer-events: auto;
-            overflow: hidden;
         }
 
-        /* 紙箱紅色飾條 (底部與側邊) */
         .package::before {
             content: '';
             position: absolute;
-            bottom: 20px;
+            bottom: 15px;
             left: 0;
             width: 100%;
-            height: 12px;
-            background: #D40000; /* DHL 紅 */
+            height: 8px;
+            background: #D40000; 
             border-top: 2px solid #333;
             border-bottom: 2px solid #333;
         }
 
-        /* 紙箱上的運單白標 (題目背景) */
         .label-area {
             background: white;
-            border: 3px solid #333;
+            border: 2px solid #333;
             border-radius: 4px;
-            padding: 15px;
+            padding: 10px;
             width: 90%;
-            min-height: 110px;
+            min-height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 10px;
-            box-shadow: inset 2px 2px 0px rgba(0,0,0,0.05);
+            margin-bottom: 5px;
             z-index: 10;
         }
 
-        /* 紙箱角落的圖示細節 (如 4, DHL 字樣) */
-        .box-detail {
-            position: absolute;
-            bottom: 5px;
-            right: 15px;
-            font-size: 24px;
-            font-weight: 900;
-            color: rgba(255, 255, 255, 0.8);
-            font-style: italic;
-            z-index: 20;
-        }
-
-        .box-detail-left {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 14px;
-            font-weight: 900;
-            color: #D40000;
-            z-index: 20;
-        }
-
-        /* 櫃子（打櫃區） */
-        .pallet-container {
-            position: absolute;
-            bottom: 20px;
-            width: 140px;
-            height: 220px;
-            background: rgba(255, 255, 255, 0.25);
-            border: 3px solid #D40000;
-            border-top: none;
-            border-radius: 0 0 12px 12px;
+        /* 底部櫃位區 - 固定高度確保手機上不會消失 */
+        footer {
+            height: 180px; 
+            width: 100%;
             display: flex;
-            flex-direction: column-reverse; 
-            align-items: center;
-            padding-bottom: 5px;
-            overflow: hidden;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 15px 15px 15px;
             z-index: 30;
         }
 
-        #left-pallet { left: 15px; }
-        #right-pallet { right: 15px; }
+        .pallet-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 45%;
+        }
 
-        /* 堆疊後的 OK 紙箱 */
+        .pallet-container {
+            width: 100%;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid #D40000;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            display: flex;
+            flex-direction: column-reverse; 
+            align-items: center;
+            padding-bottom: 4px;
+            overflow: hidden;
+        }
+
         .stacked-box {
-            width: 124px;
-            height: 32px;
+            width: 90%;
+            height: 18px;
             background: #FFCC00; 
-            border: 2px solid #333;
-            margin-bottom: 2px;
+            border: 1px solid #333;
+            margin-bottom: 1px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 10px;
             font-weight: 900;
             color: #D40000;
-            border-radius: 4px;
-            animation: dropIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 2px;
+            animation: dropIn 0.3s ease-out;
             position: relative;
         }
 
-        .stacked-box::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: #D40000;
-        }
-
-        @keyframes dropIn {
-            0% { transform: translateY(-60px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-
         .pallet-label {
-            position: absolute;
-            bottom: 245px; 
-            width: 140px;
+            width: 100%;
             text-align: center;
             font-weight: 900;
             color: #D40000;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             background: white;
-            padding: 8px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 35;
+            padding: 4px;
             border: 2px solid #D40000;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         #timer-bar {
             position: fixed;
             top: 0;
             left: 0;
-            height: 12px;
+            height: 6px;
             background: #D40000;
             width: 100%;
             z-index: 200;
         }
 
-        /* 說明視窗樣式 */
         #explanation-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -203,11 +181,16 @@
 
         .hidden { display: none !important; }
 
+        @keyframes dropIn {
+            0% { transform: translateY(-40px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
         .shake { animation: shake 0.4s ease-in-out; }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-15px); }
-            75% { transform: translateX(15px); }
+            10-30-50-70-90% { transform: translateX(-5px); }
+            20-40-60-80% { transform: translateX(5px); }
         }
     </style>
 </head>
@@ -218,120 +201,77 @@
     <div id="game-container">
         <!-- 開始畫面 -->
         <div id="start-screen" class="w-full h-full flex flex-col items-center justify-center p-6 z-[200] absolute bg-[#FFCC00]">
-            <h1 class="text-5xl font-black dhl-red mb-2 italic tracking-tighter">DHL EXPRESS</h1>
-            <h2 class="text-2xl font-bold mb-8 text-gray-800">專業打櫃挑戰賽</h2>
-            <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center border-4 border-black">
-                <div class="w-24 h-20 bg-[#FFCC00] mx-auto mb-4 border-4 border-black relative flex flex-col items-center justify-center rounded shadow-[6px_6px_0px_rgba(0,0,0,0.1)]">
-                    <div class="absolute bottom-4 w-full h-2 bg-red-600 border-y-2 border-black"></div>
-                    <span class="font-black text-red-600 italic text-xl z-10">DHL</span>
+            <h1 class="text-4xl font-black dhl-red mb-1 italic text-center">DHL EXPRESS</h1>
+            <h2 class="text-xl font-bold mb-6 text-gray-800">專業打櫃挑戰賽</h2>
+            <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-xs w-full text-center border-4 border-black">
+                <div class="w-16 h-14 bg-[#FFCC00] mx-auto mb-4 border-2 border-black relative flex items-center justify-center rounded">
+                    <span class="font-black text-red-600 italic text-sm">DHL</span>
                 </div>
-                <p class="text-gray-700 mb-6 font-bold">準確裝載是物流專家的基本功！</p>
-                <div class="text-left text-sm space-y-4 text-gray-600 mb-8 font-medium">
-                    <div class="flex items-center gap-3">
-                        <span class="text-2xl">📦</span>
-                        <p>題目顯示在黃色紙箱標籤上</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="text-2xl">⬅️➡️</span>
-                        <p>左右滑動紙箱送入正確櫃位</p>
-                    </div>
-                </div>
-                <button id="start-btn" class="w-full bg-dhl-red text-white py-5 rounded-2xl text-2xl font-bold shadow-[0_6px_0_#990000] active:translate-y-1 active:shadow-none transition-all">
+                <p class="text-sm text-gray-700 mb-6 font-bold">準確積載是物流尖兵的基本功！</p>
+                <button id="start-btn" class="w-full bg-dhl-red text-white py-4 rounded-xl text-xl font-bold shadow-[0_4px_0_#990000] active:translate-y-1 active:shadow-none">
                     領取任務
                 </button>
             </div>
         </div>
 
         <!-- 遊戲畫面 -->
-        <div id="game-play" class="hidden w-full h-full">
-            <div class="absolute top-12 left-0 w-full text-center z-50">
-                <div class="text-gray-700 font-bold text-xs uppercase tracking-widest">Efficiency Score</div>
-                <div id="score" class="text-5xl font-black dhl-red">0</div>
-            </div>
+        <div id="game-play" class="hidden flex flex-col h-full w-full">
+            <header>
+                <div class="text-gray-600 font-bold text-[10px] uppercase tracking-widest">Efficiency</div>
+                <div id="score" class="text-4xl font-black dhl-red">0</div>
+            </header>
 
             <div id="work-area">
-                <!-- 紙箱會在這裡生成 -->
+                <!-- 紙箱生成區 -->
             </div>
 
-            <!-- 左側答案櫃 -->
-            <div id="left-label" class="pallet-label" style="left:15px">選項 A</div>
-            <div id="left-pallet" class="pallet-container"></div>
-
-            <!-- 右側答案櫃 -->
-            <div id="right-label" class="pallet-label" style="right:15px">選項 B</div>
-            <div id="right-pallet" class="pallet-container"></div>
+            <footer>
+                <div class="pallet-wrap">
+                    <div id="left-label" class="pallet-label">選項 A</div>
+                    <div id="left-pallet" class="pallet-container"></div>
+                </div>
+                <div class="pallet-wrap">
+                    <div id="right-label" class="pallet-label">選項 B</div>
+                    <div id="right-pallet" class="pallet-container"></div>
+                </div>
+            </footer>
         </div>
 
         <!-- 答案解析視窗 -->
         <div id="explanation-overlay" class="hidden">
-            <div class="bg-white w-5/6 max-w-sm rounded-3xl border-4 border-black p-6 shadow-2xl transform scale-100">
-                <div id="result-indicator" class="text-2xl font-black mb-2 italic">CORRECT!</div>
-                <div class="h-1 bg-gray-200 mb-4"></div>
-                <h3 class="font-bold text-gray-500 text-xs uppercase mb-1">Knowledge Point</h3>
-                <p id="explanation-text" class="text-gray-800 font-medium leading-relaxed mb-6">
-                    這裡會顯示答案說明...
+            <div class="bg-white w-10/12 max-w-sm rounded-2xl border-4 border-black p-5 shadow-2xl">
+                <div id="result-indicator" class="text-xl font-black mb-2 italic">CORRECT!</div>
+                <p id="explanation-text" class="text-gray-700 text-sm font-medium leading-snug mb-5">
+                    解析內容...
                 </p>
-                <button id="next-task-btn" class="w-full bg-dhl-red text-white py-4 rounded-xl font-black text-lg shadow-[0_4px_0_#990000] active:translate-y-1 active:shadow-none">
-                    繼續任務
+                <button id="next-task-btn" class="w-full bg-dhl-red text-white py-3 rounded-lg font-black text-md">
+                    下一個任務
                 </button>
             </div>
         </div>
 
         <!-- 結果畫面 -->
         <div id="result-screen" class="hidden w-full h-full flex flex-col items-center justify-center p-6 z-[300] absolute bg-[#FFCC00]">
-            <h2 class="text-4xl font-black dhl-red mb-4 italic">任務完成！</h2>
-            <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center border-4 border-black">
-                <p class="text-gray-600 mb-2 font-bold text-lg">裝載效率評分：</p>
-                <div id="final-score" class="text-7xl font-black mb-4 dhl-red">0</div>
-                <p id="rank-text" class="text-2xl font-bold text-yellow-600 mb-8"></p>
-                <button onclick="location.reload()" class="w-full bg-gray-800 text-white py-4 rounded-2xl font-bold mb-4">重新挑戰</button>
-       <!-- 方案：使用 JavaScript 的強效跳轉 -->
-                <button id="join-team-btn" class="w-full bg-dhl-red text-white py-4 rounded-2xl font-bold shadow-[0_4px_0_#990000] active:translate-y-1 active:shadow-none text-center block transition-all">
-                    加入卓越團隊
-                </button>
+            <h2 class="text-3xl font-black dhl-red mb-4 italic">任務完成！</h2>
+            <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-xs w-full text-center border-4 border-black">
+                <p class="text-sm text-gray-600 font-bold">積載效率：</p>
+                <div id="final-score" class="text-6xl font-black mb-2 dhl-red">0</div>
+                <p id="rank-text" class="text-lg font-bold text-yellow-600 mb-6"></p>
                 
-                <p class="text-[10px] text-gray-400 mt-4 italic">Tip: 若無法開啟，請檢查瀏覽器彈窗設定</p>
+                <button onclick="window.location.reload()" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold mb-3">重新挑戰</button>
+                <button id="join-team-btn" class="w-full bg-dhl-red text-white py-3 rounded-xl font-bold">加入卓越團隊</button>
             </div>
         </div>
     </div>
 
     <script>
+        // 核心邏輯保持一致，優化了手機端交互靈敏度
         const questions = [
-            { 
-                q: "DHL 是在哪裡成立的？", 
-                left: "舊金山", 
-                right: "辛辛那提", 
-                correct: "left",
-                desc: "DHL於1969年在美國舊金山成立，辛辛那提則是目前DHL在美國的主要轉運中心。"
-            },
-            { 
-                q: "DHL 主要的業務內容是什麼？", 
-                left: "國際快遞/供應鏈", 
-                right: "僅限餐飲外送", 
-                correct: "left",
-                desc: "DHL作為全球主要物流業者，致力於提供高品質的物流服務，並運用最新科技、擁抱數位化，同時引領永續物流發展，實踐「連結人群，改善生活」的企業宗旨。。"
-            },
-            { 
-                q: "DHL 品牌名稱字母來自？", 
-                left: "創始人姓氏首字母", 
-                right: "快遞服務縮寫", 
-                correct: "left",
-                desc: "DHL為Adrian Dalsey、Larry Hillblom和Robert Lynn成立的，因此品牌名稱取自三個人的姓氏首字母。"
-            },
-            { 
-                q: "集團目標是？", 
-                left: "辦公室綠化", 
-                right: "2050 淨零碳排", 
-                correct: "right",
-                desc: "DHL很重視環保，集團目標是在2050年能達到全集團淨零碳排(zero-emission)，目前也有提供永續物流的相關服務。"
-            },
-            { 
-                q: "DHL 的標誌顏色是？", 
-                left: "綠與黑", 
-                right: "黃與紅", 
-                correct: "right",
-                desc: "DHL一開始的logo顏色是紅色和白色。隨著時間演進，品牌認為黃色更能展現「金黃色的速度」，才開始出現為人熟知的紅黃品牌色。"
-            }
+            { q: "DHL 是在哪裡成立的？", left: "舊金山", right: "辛辛那提", correct: "left", desc: "DHL於1969年在美國舊金山成立。" },
+            { q: "DHL 主要的業務是什麼？", left: "國際快遞/供應鏈", right: "餐飲外送", correct: "left", desc: "DHL是世界最大的物流集團。" },
+            { q: "DHL 名字來源？", left: "創始人姓氏", right: "快遞縮寫", correct: "left", desc: "來自 Dalsey, Hillblom, Lynn 三位創始人。" },
+            { q: "集團環保目標？", left: "辦公室綠化", right: "2050 淨零排放", correct: "right", desc: "目標在2050年達成全集團淨零排放。" },
+            { q: "DHL 品牌色？", left: "綠與黑", right: "黃與紅", correct: "right", desc: "黃底紅字是 DHL 最經典的識別色。" }
         ];
 
         let score = 0;
@@ -340,7 +280,6 @@
         let timerPaused = false;
         let currentPackage = null;
         let startX = 0;
-        let currentX = 0;
         let questionIndex = 0;
 
         const startBtn = document.getElementById('start-btn');
@@ -350,9 +289,16 @@
         const leftPallet = document.getElementById('left-pallet');
         const rightPallet = document.getElementById('right-pallet');
         const expOverlay = document.getElementById('explanation-overlay');
+        const joinBtn = document.getElementById('join-team-btn');
 
         startBtn.addEventListener('click', startGame);
         nextTaskBtn.addEventListener('click', hideExplanation);
+
+        joinBtn.addEventListener('click', function() {
+            const url = "https://careers.dhl.com/global/en";
+            const newWindow = window.open(url, '_blank');
+            if (!newWindow || newWindow.closed) window.location.href = url;
+        });
 
         function startGame() {
             document.getElementById('start-screen').classList.add('hidden');
@@ -365,26 +311,17 @@
         function startTimer() {
             const timerBar = document.getElementById('timer-bar');
             const interval = setInterval(() => {
-                if (!gameActive) {
-                    clearInterval(interval);
-                    return;
-                }
+                if (!gameActive) { clearInterval(interval); return; }
                 if (!timerPaused) {
                     timeLeft -= 0.1;
                     timerBar.style.width = (timeLeft / 30 * 100) + '%';
-                    if (timeLeft <= 0) {
-                        endGame();
-                        clearInterval(interval);
-                    }
+                    if (timeLeft <= 0) endGame();
                 }
             }, 100);
         }
 
         function spawnQuestion() {
-            if (!gameActive || questionIndex >= questions.length) {
-                if(questionIndex >= questions.length) endGame();
-                return;
-            }
+            if (!gameActive || questionIndex >= questions.length) return;
             const data = questions[questionIndex];
             
             document.getElementById('left-label').innerText = data.left;
@@ -392,120 +329,89 @@
 
             const pkg = document.createElement('div');
             pkg.className = 'package';
-            pkg.dataset.correct = data.correct;
             pkg.innerHTML = `
-                <div class="box-detail-left italic">DHL</div>
                 <div class="label-area">
-                    <div class="text-xl font-black text-gray-800 leading-tight">${data.q}</div>
+                    <div class="text-base font-black text-gray-800">${data.q}</div>
                 </div>
-                <div class="box-detail">4</div>
             `;
-            
             workArea.appendChild(pkg);
             currentPackage = pkg;
 
-            // Touch events
-            pkg.addEventListener('touchstart', (e) => {
-                if(timerPaused) return;
-                startX = e.touches[0].clientX;
-                currentX = startX;
-            }, {passive: true});
-            pkg.addEventListener('touchmove', handleMove, {passive: false});
-            pkg.addEventListener('touchend', handleEnd);
-            
-            // Mouse events
+            const handleStart = (x) => { if(!timerPaused) startX = x; };
+            const handleMove = (x) => {
+                if (!currentPackage || timerPaused) return;
+                const diff = x - startX;
+                currentPackage.style.transform = `translateX(${diff}px) rotate(${diff/15}deg)`;
+            };
+            const handleEnd = (x) => {
+                if (!currentPackage || timerPaused) return;
+                const diff = x - startX;
+                // 手機端感應距離調優
+                if (diff < -60) validate('left');
+                else if (diff > 60) validate('right');
+                else {
+                    currentPackage.style.transition = 'transform 0.3s ease';
+                    currentPackage.style.transform = 'translateX(0) rotate(0)';
+                    setTimeout(() => currentPackage.style.transition = '', 300);
+                }
+            };
+
+            pkg.addEventListener('touchstart', (e) => handleStart(e.touches[0].clientX), {passive: true});
+            pkg.addEventListener('touchmove', (e) => { e.preventDefault(); handleMove(e.touches[0].clientX); }, {passive: false});
+            pkg.addEventListener('touchend', (e) => handleEnd(e.changedTouches[0].clientX));
+
             pkg.addEventListener('mousedown', (e) => {
-                if(timerPaused) return;
-                startX = e.clientX;
-                currentX = startX;
-                const onMouseMove = (me) => handleMove({touches: [{clientX: me.clientX}], preventDefault: () => {}});
-                const onMouseUp = (ue) => {
-                    handleEnd({changedTouches: [{clientX: ue.clientX}]});
-                    window.removeEventListener('mousemove', onMouseMove);
-                    window.removeEventListener('mouseup', onMouseUp);
+                handleStart(e.clientX);
+                const onMM = (me) => handleMove(me.clientX);
+                const onMU = (ue) => {
+                    handleEnd(ue.clientX);
+                    window.removeEventListener('mousemove', onMM);
+                    window.removeEventListener('mouseup', onMU);
                 };
-                window.addEventListener('mousemove', onMouseMove);
-                window.addEventListener('mouseup', onMouseUp);
+                window.addEventListener('mousemove', onMM);
+                window.addEventListener('mouseup', onMU);
             });
-        }
-
-        function handleMove(e) {
-            if (!currentPackage || timerPaused) return;
-            e.preventDefault();
-            currentX = e.touches ? e.touches[0].clientX : e.clientX;
-            const diff = currentX - startX;
-            currentPackage.style.transform = `translateX(${diff}px) rotate(${diff/10}deg)`;
-        }
-
-        function handleEnd(e) {
-            if (!currentPackage || timerPaused) return;
-            const finalX = e.changedTouches ? e.changedTouches[0].clientX : currentX;
-            const diff = finalX - startX;
-            
-            if (diff < -80) validate('left');
-            else if (diff > 80) validate('right');
-            else {
-                currentPackage.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                currentPackage.style.transform = 'translateX(0) rotate(0)';
-                setTimeout(() => { if(currentPackage) currentPackage.style.transition = ''; }, 300);
-            }
         }
 
         function validate(choice) {
             const data = questions[questionIndex];
             const isCorrect = choice === data.correct;
             const targetPallet = choice === 'left' ? leftPallet : rightPallet;
-            
-            timerPaused = true; // 暫停計時
+            timerPaused = true; 
 
             if (isCorrect) {
                 score += 20;
-                currentPackage.style.transition = 'all 0.5s cubic-bezier(0.5, 0, 0.5, 1)';
-                currentPackage.style.transform = `translate(${choice === 'left' ? -180 : 180}px, 450px) scale(0.2) rotate(0deg)`;
+                currentPackage.style.transition = 'all 0.4s ease-in';
+                currentPackage.style.transform = `translate(${choice === 'left' ? -150 : 150}px, 300px) scale(0.1)`;
                 currentPackage.style.opacity = '0';
-                
-                setTimeout(() => {
-                    addStackedBox(targetPallet);
-                }, 350);
-                showExplanation(true, data.desc);
+                setTimeout(() => addStackedBox(targetPallet), 300);
             } else {
                 score = Math.max(0, score - 10);
-                currentPackage.style.transition = 'all 0.6s ease-in';
-                currentPackage.style.transform = `translate(${choice === 'left' ? -300 : 300}px, 700px) rotate(${choice === 'left' ? -120 : 120}deg)`;
+                currentPackage.style.transition = 'all 0.5s ease-out';
+                currentPackage.style.transform = `translateY(500px) rotate(90deg)`;
                 currentPackage.style.opacity = '0';
                 document.body.classList.add('shake');
                 setTimeout(() => document.body.classList.remove('shake'), 400);
-                showExplanation(false, data.desc);
             }
-
             scoreDisplay.innerText = score;
+            showExplanation(isCorrect, data.desc);
         }
 
         function showExplanation(isCorrect, text) {
-            const indicator = document.getElementById('result-indicator');
-            const expText = document.getElementById('explanation-text');
-            
-            indicator.innerText = isCorrect ? "CORRECT!" : "INCORRECT";
-            indicator.className = isCorrect ? "text-2xl font-black mb-2 italic text-green-600" : "text-2xl font-black mb-2 italic text-red-600";
-            expText.innerText = text;
-            
-            setTimeout(() => {
-                expOverlay.classList.remove('hidden');
-            }, 600);
+            const ind = document.getElementById('result-indicator');
+            ind.innerText = isCorrect ? "答對了！" : "答錯囉！";
+            ind.className = isCorrect ? "text-xl font-black mb-2 text-green-600" : "text-xl font-black mb-2 text-red-600";
+            document.getElementById('explanation-text').innerText = text;
+            setTimeout(() => expOverlay.classList.remove('hidden'), 500);
         }
 
         function hideExplanation() {
             expOverlay.classList.add('hidden');
             if (currentPackage) currentPackage.remove();
-            currentPackage = null;
             questionIndex++;
             timerPaused = false;
-            
-            if (questionIndex >= questions.length) {
-                endGame();
-            } else {
-                spawnQuestion();
-            }
+            if (questionIndex >= questions.length) endGame();
+            else spawnQuestion();
         }
 
         function addStackedBox(pallet) {
@@ -513,9 +419,6 @@
             box.className = 'stacked-box';
             box.innerText = `OK`;
             pallet.appendChild(box);
-            if (pallet.children.length > 6) {
-                pallet.removeChild(pallet.firstChild);
-            }
         }
 
         function endGame() {
@@ -523,16 +426,9 @@
             document.getElementById('game-play').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
             document.getElementById('final-score').innerText = score;
-            
-            let rank = "需再加強";
-            if (score >= 100) rank = "🏆 卓越打櫃大師";
-            else if (score >= 60) rank = "🚚 專業物流士";
-            else if (score >= 20) rank = "📦 實習理貨員";
-            
+            let rank = score >= 100 ? "🏆 特級打櫃大師" : (score >= 60 ? "🚚 專業物流士" : "📦 實習操作員");
             document.getElementById('rank-text').innerText = rank;
         }
     </script>
 </body>
 </html>
-
-
