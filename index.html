@@ -109,7 +109,7 @@
         }
 
         footer {
-            height: 160px; 
+            height: 180px; /* 增加底部高度以容納多行文字 */
             width: 100%;
             display: flex;
             justify-content: space-between;
@@ -128,7 +128,7 @@
 
         .pallet-container {
             width: 100%;
-            height: 110px;
+            height: 100px;
             background: rgba(255, 255, 255, 0.4);
             border: 3px solid #D40000;
             border-top: none;
@@ -159,19 +159,22 @@
 
         .pallet-label {
             width: 100%;
+            min-height: 48px; /* 設定最小高度 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
             font-weight: 900;
             color: #D40000;
-            font-size: 0.8rem;
+            font-size: 0.75rem; /* 稍微縮小字體以利換行 */
+            line-height: 1.2;
             background: white;
-            padding: 4px;
+            padding: 4px 6px;
             border: 2px solid #D40000;
             border-radius: 8px;
             margin-bottom: 4px;
             box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            word-break: break-all; /* 確保長單字也能換行 */
         }
 
         #timer-bar {
@@ -272,7 +275,7 @@
         <div id="result-screen" class="hidden w-full h-full flex flex-col items-center justify-center p-6 z-[300] absolute bg-[#FFCC00]">
             <h2 class="text-3xl font-black dhl-red mb-4 italic text-center">任務完成！</h2>
             <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-xs w-full text-center border-4 border-black">
-                <p class="text-xs text-gray-600 font-bold uppercase tracking-wider">積載效率總評分</p>
+                <p class="text-xs text-gray-600 font-bold uppercase tracking-wider">裝載效率總評分</p>
                 <div id="final-score" class="text-6xl font-black mb-2 dhl-red">0</div>
                 <p id="rank-text" class="text-lg font-bold text-yellow-600 mb-6"></p>
                 
@@ -284,11 +287,11 @@
 
     <script>
         const questions = [
-            { q: "DHL是在哪裡成立的？", left: "A. 舊金山", right: "B. 辛辛那提", correct: "left", desc: "DHL於1969年在舊金山成立，辛辛那提則是DHL在美洲的主要轉運中心。" },
-            { q: "DHL 主要的業務是什麼？", left: "A. 物流服務", right: "B. 外送服務", correct: "left", desc: "DHL是物流業的領導品牌，致力於提供高品質物流服務，並運用最新科技、引領永續物流發展。" },
-            { q: "DHL 品牌名稱的由來？", left: "A. Deliver Happiness & Love", right: "B. 創辦人的姓氏首字縮寫", correct: "right", desc: "DHL為三位創辦人Adrian Dalsey, Larry Hillblom和Robert Lynn的姓氏首字組成。" },
+            { q: "DHL是在哪裡成立的？", left: "A. 舊金山 (San Francisco)", right: "B. 辛辛那提 (Cincinnati)", correct: "left", desc: "DHL於1969年在舊金山成立，辛辛那提則是DHL在美洲的主要轉運中心。" },
+            { q: "DHL 主要的業務是什麼？", left: "A. 專業國際物流服務", right: "B. 點餐平台外送服務", correct: "left", desc: "DHL是物流業的領導品牌，致力於提供高品質物流服務，並運用最新科技、引領永續物流發展。" },
+            { q: "DHL 品牌名稱的由來？", left: "A. Deliver Happiness and Love", right: "B. 創辦人的姓氏首字縮寫", correct: "right", desc: "DHL為三位創辦人Adrian Dalsey, Larry Hillblom和Robert Lynn的姓氏首字組成。" },
             { q: "DHL 的集團目標為？", left: "A. 2030年集團禁用塑膠包材", right: "B. 2050年達成淨零碳排", correct: "right", desc: "DHL集團目標為在2050年達到淨零碳排，目前也已推出永續物流的服務。" },
-            { q: "DHL的logo顏色為？", left: "A. 藍色和綠色", right: "B. 黃色和紅色", correct: "right", desc: "DHL 成立初期，logo為紅白色，隨著時代演進，轉變為強調金黃速度的紅黃品牌色。" }
+            { q: "DHL的logo顏色為？", left: "A. 藍色背景配綠色字體", right: "B. 黃色背景配紅色字體", correct: "right", desc: "DHL 成立初期，logo為紅白色，隨著時代演進，轉變為強調金黃速度的紅黃品牌色。" }
         ];
 
         let score = 0;
@@ -299,7 +302,7 @@
         let startX = 0;
         let questionIndex = 0;
 
-        // --- 進階音樂系統 (強化手機兼容版) ---
+        // --- 進階音樂系統 (iPhone/iOS 強化版) ---
         let audioCtx = null;
         let isMusicPlaying = false;
         let nextNoteTime = 0;
@@ -309,19 +312,28 @@
         let beat = 0;
 
         const musicBtn = document.getElementById('music-toggle');
-        musicBtn.addEventListener('click', toggleMusic);
-
-        function initAudio() {
+        
+        // 針對 iOS/Safari 特別優化：在 Touch 事件中解鎖
+        const unlockAudio = () => {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
-        }
+            // 播放極短暫的靜音，確保 iOS 承認此 Context 已激活
+            const buffer = audioCtx.createBuffer(1, 1, 22050);
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioCtx.destination);
+            source.start(0);
+        };
+
+        musicBtn.addEventListener('click', toggleMusic);
+        musicBtn.addEventListener('touchstart', unlockAudio, { passive: true });
 
         function toggleMusic() {
-            initAudio();
+            unlockAudio();
             isMusicPlaying = !isMusicPlaying;
             musicBtn.innerText = isMusicPlaying ? "🔊" : "🔇";
             if (isMusicPlaying) {
@@ -335,7 +347,7 @@
             const gain = audioCtx.createGain();
             osc.frequency.setValueAtTime(150, time);
             osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.1);
-            gain.gain.setValueAtTime(0.6, time); // 稍微增加音量
+            gain.gain.setValueAtTime(0.5, time);
             gain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.start(time); osc.stop(time + 0.1);
@@ -348,13 +360,13 @@
             for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
             noise.buffer = buffer;
             const gain = audioCtx.createGain();
-            gain.gain.setValueAtTime(0.15, time);
+            gain.gain.setValueAtTime(0.1, time);
             gain.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
             noise.connect(gain); gain.connect(audioCtx.destination);
             noise.start(time);
         }
 
-        function playSynthNote(time, freq, dur, vol = 0.12) {
+        function playSynthNote(time, freq, dur, vol = 0.08) {
             const osc1 = audioCtx.createOscillator();
             const osc2 = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -382,11 +394,13 @@
             const measure = Math.floor(beatNum / 8);
             if (step === 0 || step === 1) playKick(time);
             if (step === 2 || step === 3) playSnare(time);
-            let freq = 98; 
-            if (step === 2) freq = 116.5; 
-            if (step === 3) freq = 130.8; 
-            if (measure % 4 === 3) freq *= 2; 
-            playSynthNote(time, freq, step < 2 ? 0.3 : 0.15, 0.1);
+            
+            let freq = 130.8; // C3
+            if (step === 2) freq = 155.6; // Eb3
+            if (step === 3) freq = 174.6; // F3
+            if (measure % 4 === 3) freq *= 1.5; 
+            
+            playSynthNote(time, freq, step < 2 ? 0.25 : 0.12, 0.08);
         }
 
         function scheduler() {
@@ -407,8 +421,9 @@
         const expOverlay = document.getElementById('explanation-overlay');
         const joinBtn = document.getElementById('join-team-btn');
 
+        startBtn.addEventListener('touchstart', unlockAudio, { passive: true });
         startBtn.addEventListener('click', () => {
-            initAudio(); // 關鍵：在使用者點擊按鈕時啟動 AudioContext
+            unlockAudio();
             startGame();
         });
         
@@ -546,4 +561,3 @@
     </script>
 </body>
 </html>
-
