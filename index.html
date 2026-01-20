@@ -11,7 +11,7 @@
             font-family: 'Arial', sans-serif;
             overflow: hidden;
             touch-action: none;
-            height: 100dvh; /* 使用動態視窗高度修正手機遮擋問題 */
+            height: 100dvh; 
             width: 100vw;
             margin: 0;
         }
@@ -25,7 +25,6 @@
             position: relative;
         }
 
-        /* 頂部資訊區 - 縮減高度 */
         header {
             height: 60px;
             display: flex;
@@ -36,25 +35,24 @@
             padding-top: 5px;
         }
 
-        /* 音樂控制按鈕 */
         #music-toggle {
             position: absolute;
             top: 15px;
             right: 15px;
-            background: rgba(212, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.5);
             border: 2px solid #D40000;
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 100;
-            font-size: 1rem;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* 遊戲作業區 */
         #work-area {
             flex-grow: 1;
             width: 100%;
@@ -66,7 +64,6 @@
             overflow: hidden;
         }
 
-        /* 適配手機比例的紙箱 - 微調尺寸 */
         .package {
             width: 220px; 
             min-height: 160px; 
@@ -111,7 +108,6 @@
             z-index: 10;
         }
 
-        /* 底部櫃位區 - 優化手機可視度 */
         footer {
             height: 160px; 
             width: 100%;
@@ -276,7 +272,7 @@
         <div id="result-screen" class="hidden w-full h-full flex flex-col items-center justify-center p-6 z-[300] absolute bg-[#FFCC00]">
             <h2 class="text-3xl font-black dhl-red mb-4 italic text-center">任務完成！</h2>
             <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-xs w-full text-center border-4 border-black">
-                <p class="text-xs text-gray-600 font-bold uppercase tracking-wider">裝載效率總評分</p>
+                <p class="text-xs text-gray-600 font-bold uppercase tracking-wider">積載效率總評分</p>
                 <div id="final-score" class="text-6xl font-black mb-2 dhl-red">0</div>
                 <p id="rank-text" class="text-lg font-bold text-yellow-600 mb-6"></p>
                 
@@ -303,7 +299,7 @@
         let startX = 0;
         let questionIndex = 0;
 
-        // --- 進階音樂系統 (Mission Impossible Style) ---
+        // --- 進階音樂系統 (強化手機兼容版) ---
         let audioCtx = null;
         let isMusicPlaying = false;
         let nextNoteTime = 0;
@@ -316,7 +312,12 @@
         musicBtn.addEventListener('click', toggleMusic);
 
         function initAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
 
         function toggleMusic() {
@@ -324,7 +325,6 @@
             isMusicPlaying = !isMusicPlaying;
             musicBtn.innerText = isMusicPlaying ? "🔊" : "🔇";
             if (isMusicPlaying) {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
                 nextNoteTime = audioCtx.currentTime;
                 scheduler();
             }
@@ -335,7 +335,7 @@
             const gain = audioCtx.createGain();
             osc.frequency.setValueAtTime(150, time);
             osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.1);
-            gain.gain.setValueAtTime(0.5, time);
+            gain.gain.setValueAtTime(0.6, time); // 稍微增加音量
             gain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.start(time); osc.stop(time + 0.1);
@@ -348,13 +348,13 @@
             for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
             noise.buffer = buffer;
             const gain = audioCtx.createGain();
-            gain.gain.setValueAtTime(0.1, time);
+            gain.gain.setValueAtTime(0.15, time);
             gain.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
             noise.connect(gain); gain.connect(audioCtx.destination);
             noise.start(time);
         }
 
-        function playSynthNote(time, freq, dur, vol = 0.1) {
+        function playSynthNote(time, freq, dur, vol = 0.12) {
             const osc1 = audioCtx.createOscillator();
             const osc2 = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -386,7 +386,7 @@
             if (step === 2) freq = 116.5; 
             if (step === 3) freq = 130.8; 
             if (measure % 4 === 3) freq *= 2; 
-            playSynthNote(time, freq, step < 2 ? 0.3 : 0.15, 0.08);
+            playSynthNote(time, freq, step < 2 ? 0.3 : 0.15, 0.1);
         }
 
         function scheduler() {
@@ -407,7 +407,11 @@
         const expOverlay = document.getElementById('explanation-overlay');
         const joinBtn = document.getElementById('join-team-btn');
 
-        startBtn.addEventListener('click', startGame);
+        startBtn.addEventListener('click', () => {
+            initAudio(); // 關鍵：在使用者點擊按鈕時啟動 AudioContext
+            startGame();
+        });
+        
         nextTaskBtn.addEventListener('click', hideExplanation);
 
         joinBtn.addEventListener('click', () => {
@@ -415,8 +419,6 @@
         });
 
         function startGame() {
-            initAudio();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
             if (!isMusicPlaying) toggleMusic(); 
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-play').classList.remove('hidden');
