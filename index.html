@@ -294,47 +294,46 @@
             { q: "DHL的logo顏色為？", left: "A. 藍色背景配綠色字體", right: "B. 黃色背景配紅色字體", correct: "right", desc: "DHL 成立初期，logo為紅白色，隨著時代演進，轉變為強調金黃速度的紅黃品牌色。" }
         ];
 
-        let score = 0;
-        let timeLeft = 30;
-        let gameActive = false;
-        let timerPaused = false;
-        let currentPackage = null;
-        let startX = 0;
-        let questionIndex = 0;
+        let score = 0, timeLeft = 30, gameActive = false, timerPaused = false, questionIndex = 0;
+        let currentPackage = null, startX = 0;
 
-        // --- 進階音樂系統 (iPhone/iOS 強化版) ---
+        // --- iPhone 強化音訊引擎 ---
         let audioCtx = null;
         let isMusicPlaying = false;
-        let nextNoteTime = 0;
-        const tempo = 175; 
-        const lookahead = 25.0;
-        const scheduleAheadTime = 0.1;
-        let beat = 0;
+        let nextNoteTime = 0, beat = 0;
+        const tempo = 175;
 
-        const musicBtn = document.getElementById('music-toggle');
-        
-        // 針對 iOS/Safari 特別優化：在 Touch 事件中解鎖
-        const unlockAudio = () => {
+        // 解鎖 iOS AudioContext 的終極方案
+        async function unlockAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
             if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
+                await audioCtx.resume();
             }
-            // 播放極短暫的靜音，確保 iOS 承認此 Context 已激活
+            // 播放一個靜音緩衝
             const buffer = audioCtx.createBuffer(1, 1, 22050);
             const source = audioCtx.createBufferSource();
             source.buffer = buffer;
             source.connect(audioCtx.destination);
             source.start(0);
+        }
+
+        const musicBtn = document.getElementById('music-toggle');
+        
+        // 使用 touchstart 確保 iOS 識別使用者意圖
+        const handleInteraction = async () => {
+            await unlockAudio();
+            if (!isMusicPlaying && gameActive) {
+                toggleMusic(true);
+            }
         };
 
-        musicBtn.addEventListener('click', toggleMusic);
+        musicBtn.addEventListener('click', () => toggleMusic());
         musicBtn.addEventListener('touchstart', unlockAudio, { passive: true });
 
-        function toggleMusic() {
-            unlockAudio();
-            isMusicPlaying = !isMusicPlaying;
+        function toggleMusic(force = null) {
+            isMusicPlaying = force !== null ? force : !isMusicPlaying;
             musicBtn.innerText = isMusicPlaying ? "🔊" : "🔇";
             if (isMusicPlaying) {
                 nextNoteTime = audioCtx.currentTime;
@@ -344,71 +343,36 @@
 
         function playKick(time) {
             const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.frequency.setValueAtTime(150, time);
-            osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.1);
-            gain.gain.setValueAtTime(0.5, time);
-            gain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(time); osc.stop(time + 0.1);
+            const g = audioCtx.createGain();
+            osc.frequency.setValueAtTime(120, time);
+            osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.12);
+            g.gain.setValueAtTime(0.4, time);
+            g.gain.exponentialRampToValueAtTime(0.01, time + 0.12);
+            osc.connect(g); g.connect(audioCtx.destination);
+            osc.start(time); osc.stop(time + 0.12);
         }
 
-        function playSnare(time) {
-            const noise = audioCtx.createBufferSource();
-            const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.05, audioCtx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buffer;
-            const gain = audioCtx.createGain();
-            gain.gain.setValueAtTime(0.1, time);
-            gain.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
-            noise.connect(gain); gain.connect(audioCtx.destination);
-            noise.start(time);
-        }
-
-        function playSynthNote(time, freq, dur, vol = 0.08) {
-            const osc1 = audioCtx.createOscillator();
-            const osc2 = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc1.type = 'sawtooth';
-            osc2.type = 'square';
-            osc1.frequency.setValueAtTime(freq, time);
-            osc2.frequency.setValueAtTime(freq / 2, time);
-            gain.gain.setValueAtTime(vol, time);
-            gain.gain.exponentialRampToValueAtTime(0.001, time + dur);
-            osc1.connect(gain); osc2.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc1.start(time); osc2.start(time);
-            osc1.stop(time + dur); osc2.stop(time + dur);
-        }
-
-        function nextNote() {
-            const secondsPerBeat = 60.0 / tempo;
-            const rhythm = [1, 1, 0.5, 0.5];
-            nextNoteTime += rhythm[beat % 4] * secondsPerBeat;
-            beat++;
-        }
-
-        function scheduleNote(beatNum, time) {
-            const step = beatNum % 4;
-            const measure = Math.floor(beatNum / 8);
-            if (step === 0 || step === 1) playKick(time);
-            if (step === 2 || step === 3) playSnare(time);
-            
-            let freq = 130.8; // C3
-            if (step === 2) freq = 155.6; // Eb3
-            if (step === 3) freq = 174.6; // F3
-            if (measure % 4 === 3) freq *= 1.5; 
-            
-            playSynthNote(time, freq, step < 2 ? 0.25 : 0.12, 0.08);
+        function playSynth(time, freq, dur) {
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(freq, time);
+            g.gain.setValueAtTime(0.06, time);
+            g.gain.exponentialRampToValueAtTime(0.001, time + dur);
+            osc.connect(g); g.connect(audioCtx.destination);
+            osc.start(time); osc.stop(time + dur);
         }
 
         function scheduler() {
-            while (isMusicPlaying && nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
-                scheduleNote(beat, nextNoteTime);
-                nextNote();
+            while (isMusicPlaying && nextNoteTime < audioCtx.currentTime + 0.1) {
+                const step = beat % 4;
+                if (step === 0) playKick(nextNoteTime);
+                const freq = [130, 155, 174, 196][step];
+                playSynth(nextNoteTime, freq, 0.1);
+                nextNoteTime += 60.0 / tempo;
+                beat++;
             }
-            if (isMusicPlaying) setTimeout(scheduler, lookahead);
+            if (isMusicPlaying) setTimeout(scheduler, 25);
         }
 
         // --- 遊戲邏輯 ---
@@ -416,25 +380,17 @@
         const nextTaskBtn = document.getElementById('next-task-btn');
         const workArea = document.getElementById('work-area');
         const scoreDisplay = document.getElementById('score');
-        const leftPallet = document.getElementById('left-pallet');
-        const rightPallet = document.getElementById('right-pallet');
-        const expOverlay = document.getElementById('explanation-overlay');
-        const joinBtn = document.getElementById('join-team-btn');
 
-        startBtn.addEventListener('touchstart', unlockAudio, { passive: true });
-        startBtn.addEventListener('click', () => {
-            unlockAudio();
+        startBtn.addEventListener('click', async () => {
+            await unlockAudio();
             startGame();
         });
-        
+        startBtn.addEventListener('touchstart', unlockAudio, { passive: true });
+
         nextTaskBtn.addEventListener('click', hideExplanation);
 
-        joinBtn.addEventListener('click', () => {
-            window.open("https://careers.dhl.com/global/en", "_blank");
-        });
-
         function startGame() {
-            if (!isMusicPlaying) toggleMusic(); 
+            toggleMusic(true);
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-play').classList.remove('hidden');
             gameActive = true;
@@ -443,12 +399,12 @@
         }
 
         function startTimer() {
-            const timerBar = document.getElementById('timer-bar');
-            const interval = setInterval(() => {
-                if (!gameActive) { clearInterval(interval); return; }
+            const tb = document.getElementById('timer-bar');
+            const itv = setInterval(() => {
+                if (!gameActive) { clearInterval(itv); return; }
                 if (!timerPaused) {
                     timeLeft -= 0.1;
-                    timerBar.style.width = Math.max(0, (timeLeft / 30 * 100)) + '%';
+                    tb.style.width = (timeLeft / 30 * 100) + '%';
                     if (timeLeft <= 0) endGame();
                 }
             }, 100);
@@ -466,7 +422,7 @@
             workArea.appendChild(pkg);
             currentPackage = pkg;
 
-            const handleStart = (x) => { if(!timerPaused) startX = x; };
+            const handleStart = (x) => { unlockAudio(); startX = x; };
             const handleMove = (x) => {
                 if (!currentPackage || timerPaused) return;
                 const diff = x - startX;
@@ -478,9 +434,8 @@
                 if (diff < -60) validate('left');
                 else if (diff > 60) validate('right');
                 else {
-                    currentPackage.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    currentPackage.style.transition = '0.3s';
                     currentPackage.style.transform = 'translateX(0) rotate(0)';
-                    setTimeout(() => { if(currentPackage) currentPackage.style.transition = ''; }, 300);
                 }
             };
 
@@ -503,50 +458,46 @@
         function validate(choice) {
             const data = questions[questionIndex];
             const isCorrect = choice === data.correct;
-            const targetPallet = choice === 'left' ? leftPallet : rightPallet;
             timerPaused = true; 
 
             if (isCorrect) {
                 score += 20;
-                currentPackage.style.transition = 'all 0.4s ease-in';
-                currentPackage.style.transform = `translate(${choice === 'left' ? -150 : 150}px, 200px) scale(0.1)`;
-                currentPackage.style.opacity = '0';
-                setTimeout(() => addStackedBox(targetPallet), 300);
+                currentPackage.style.transition = '0.4s';
+                currentPackage.style.transform = `translate(${choice === 'left' ? -200 : 200}px, 200px) scale(0)`;
+                setTimeout(() => addBox(choice), 300);
             } else {
                 score = Math.max(0, score - 10);
-                currentPackage.style.transition = 'all 0.5s ease-out';
-                currentPackage.style.transform = `translateY(400px) rotate(90deg)`;
-                currentPackage.style.opacity = '0';
+                currentPackage.style.transition = '0.5s';
+                currentPackage.style.transform = `translateY(400px)`;
                 document.body.classList.add('shake');
                 setTimeout(() => document.body.classList.remove('shake'), 400);
             }
             scoreDisplay.innerText = score;
-            showExplanation(isCorrect, data.desc);
+            showExp(isCorrect, data.desc);
         }
 
-        function showExplanation(isCorrect, text) {
+        function showExp(isCorrect, text) {
             const ind = document.getElementById('result-indicator');
-            ind.innerText = isCorrect ? "答對了！" : "答錯了...";
-            ind.className = isCorrect ? "text-2xl font-black mb-2 text-green-600 italic" : "text-2xl font-black mb-2 text-red-600 italic";
+            ind.innerText = isCorrect ? "正確！" : "錯誤...";
+            ind.className = isCorrect ? "text-2xl font-black mb-2 text-green-600" : "text-2xl font-black mb-2 text-red-600";
             document.getElementById('explanation-text').innerText = text;
-            setTimeout(() => expOverlay.classList.remove('hidden'), 500);
+            setTimeout(() => document.getElementById('explanation-overlay').classList.remove('hidden'), 500);
         }
 
         function hideExplanation() {
-            expOverlay.classList.add('hidden');
+            document.getElementById('explanation-overlay').classList.add('hidden');
             if (currentPackage) currentPackage.remove();
-            currentPackage = null;
             questionIndex++;
             timerPaused = false;
             if (questionIndex >= questions.length) endGame();
             else spawnQuestion();
         }
 
-        function addStackedBox(pallet) {
-            const box = document.createElement('div');
-            box.className = 'stacked-box';
-            box.innerText = `📦 OK`;
-            pallet.appendChild(box);
+        function addBox(side) {
+            const b = document.createElement('div');
+            b.className = 'stacked-box';
+            b.innerText = `📦 OK`;
+            (side === 'left' ? document.getElementById('left-pallet') : document.getElementById('right-pallet')).appendChild(b);
         }
 
         function endGame() {
@@ -555,7 +506,7 @@
             document.getElementById('game-play').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
             document.getElementById('final-score').innerText = score;
-            let rank = score >= 100 ? "🏆 特級打櫃大師" : (score >= 60 ? "🚚 專業物流士" : "📦 實習操作員");
+            let rank = score >= 100 ? "🏆 超級打櫃大師" : (score >= 60 ? "🚚 專業物流人員" : "📦 實習理貨員");
             document.getElementById('rank-text').innerText = rank;
         }
     </script>
