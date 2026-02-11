@@ -42,14 +42,14 @@
             background: rgba(255, 255, 255, 0.5);
             border: 2px solid #D40000;
             border-radius: 50%;
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 100;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
@@ -109,26 +109,25 @@
         }
 
         footer {
-            height: 180px; /* 增加底部高度以容納多行文字 */
+            height: 200px;
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            padding: 0 12px 12px 12px;
+            padding: 0 10px 10px 10px;
             z-index: 30;
-            background: linear-gradient(to top, rgba(0,0,0,0.05), transparent);
         }
 
         .pallet-wrap {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 47%;
+            width: 48%;
         }
 
         .pallet-container {
             width: 100%;
-            height: 100px;
+            height: 80px;
             background: rgba(255, 255, 255, 0.4);
             border: 3px solid #D40000;
             border-top: none;
@@ -153,28 +152,29 @@
             font-weight: 900;
             color: #D40000;
             border-radius: 2px;
-            animation: dropIn 0.3s ease-out;
             flex-shrink: 0;
         }
 
         .pallet-label {
             width: 100%;
-            min-height: 48px; /* 設定最小高度 */
+            min-height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             font-weight: 900;
             color: #D40000;
-            font-size: 0.75rem; /* 稍微縮小字體以利換行 */
-            line-height: 1.2;
+            font-size: 0.8rem;
+            line-height: 1.3;
             background: white;
-            padding: 4px 6px;
+            padding: 5px 8px;
             border: 2px solid #D40000;
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: 4px;
             box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
-            word-break: break-all; /* 確保長單字也能換行 */
+            white-space: normal; 
+            word-wrap: break-word;
+            overflow: visible;
         }
 
         #timer-bar {
@@ -203,12 +203,6 @@
         }
 
         .hidden { display: none !important; }
-
-        @keyframes dropIn {
-            0% { transform: translateY(-30px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-
         .shake { animation: shake 0.4s ease-in-out; }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
@@ -231,7 +225,12 @@
                 <div class="w-16 h-12 bg-[#FFCC00] mx-auto mb-6 border-2 border-black relative flex items-center justify-center rounded">
                     <span class="font-black text-red-600 italic text-md">DHL</span>
                 </div>
-                <p class="text-base text-gray-700 mb-8 font-bold leading-relaxed">挑戰不可能任務！<br>左右滑動紙箱完成分揀。</p>
+                <p class="text-base text-gray-700 mb-8 font-bold leading-relaxed text-left">
+                    📏 <b>規則說明：</b><br>
+                    1. 觀察包裹上的問題。<br>
+                    2. 依據正確答案<b>向左滑</b>投入A櫃，<b>向右滑</b>投入B櫃。<br>
+                    3. 挑戰在 30 秒內完美打櫃！
+                </p>
                 <button id="start-btn" class="w-full bg-dhl-red text-white py-4 rounded-2xl text-xl font-bold shadow-[0_5px_0_#990000] active:translate-y-1 active:shadow-none">
                     啟動任務
                 </button>
@@ -266,7 +265,7 @@
                 <div class="h-1 bg-gray-100 mb-4"></div>
                 <p id="explanation-text" class="text-gray-700 text-sm font-medium leading-relaxed mb-6"></p>
                 <button id="next-task-btn" class="w-full bg-dhl-red text-white py-4 rounded-xl font-black text-lg shadow-[0_4px_0_#990000] active:translate-y-1 active:shadow-none">
-                    下一個任務
+                    下一個貨件
                 </button>
             </div>
         </div>
@@ -275,35 +274,35 @@
         <div id="result-screen" class="hidden w-full h-full flex flex-col items-center justify-center p-6 z-[300] absolute bg-[#FFCC00]">
             <h2 class="text-3xl font-black dhl-red mb-4 italic text-center">任務完成！</h2>
             <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-xs w-full text-center border-4 border-black">
-                <p class="text-xs text-gray-600 font-bold uppercase tracking-wider">裝載效率總評分</p>
+                <p class="text-xs text-gray-600 font-bold uppercase tracking-wider">裝載效率總分</p>
                 <div id="final-score" class="text-6xl font-black mb-2 dhl-red">0</div>
-                <p id="rank-text" class="text-lg font-bold text-yellow-600 mb-6"></p>
+                <p id="rank-text" class="text-lg font-bold text-yellow-600 mb-4"></p>
                 
-                <button onclick="window.location.reload()" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold mb-3 shadow-[0_4px_0_#333] active:translate-y-1 active:shadow-none">重新挑戰</button>
-                <button id="join-team-btn" class="w-full bg-dhl-red text-white py-3 rounded-xl font-bold shadow-[0_4px_0_#990000] active:translate-y-1 active:shadow-none">加入卓越團隊</button>
+                <p class="text-sm font-bold text-gray-800 bg-yellow-100 py-2 px-3 rounded-lg mb-6 border border-yellow-300">
+                    🎁 註：出示此頁面給工作人員，即可兌換小禮物！
+                </p>
+                
+                <button onclick="window.location.reload()" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold mb-3 shadow-[0_4px_0_#333] active:translate-y-1 active:shadow-none">再挑戰一次</button>
+                <button id="join-team-btn" class="w-full bg-dhl-red text-white py-3 rounded-xl font-bold shadow-[0_4px_0_#990000] active:translate-y-1 active:shadow-none">加入 DHL 卓越團隊</button>
             </div>
         </div>
     </div>
 
     <script>
         const questions = [
-            { q: "DHL是在哪裡成立的？", left: "A. 舊金山 (San Francisco)", right: "B. 台北 (Taipei)", correct: "left", desc: "DHL於1969年在舊金山成立，而在1973年進到台灣，於台北成立總公司。" },
-            { q: "DHL 主要的業務是什麼？", left: "A. 專業國際物流服務", right: "B. 點餐平台外送服務", correct: "left", desc: "DHL是物流業的領導品牌，致力於提供高品質物流服務，並運用最新科技、引領永續物流發展。" },
-            { q: "DHL 品牌名稱的由來？", left: "A. Deliver Happiness and Love", right: "B. 創辦人的姓氏首字縮寫", correct: "right", desc: "DHL為三位創辦人Adrian Dalsey, Larry Hillblom和Robert Lynn的姓氏首字組成。" },
-            { q: "DHL 的集團目標為？", left: "A. 2030年開始使用電動車隊", right: "B. 2050年達成淨零碳排", correct: "right", desc: "DHL集團目標為在2050年達到淨零碳排，目前也已推出永續物流的服務。" },
-            { q: "DHL的logo顏色為？", left: "A. 藍色背景配綠色字體", right: "B. 黃色背景配紅色字體", correct: "right", desc: "DHL 成立初期，logo為紅白色，隨著時代演進，轉變為強調金黃速度的紅黃品牌色。" }
+            { q: "DHL是在哪裡成立的？", left: "A. 舊金山 (San Francisco)", right: "B. 台北 (Taipei)", correct: "left", desc: "DHL於1969年在舊金山成立，於1973年進入台灣，並在台北設立總公司。" },
+            { q: "DHL 主要的業務核心是？", left: "A. 專業國際物流服務", right: "B. 全台連鎖外送點餐平台", correct: "left", desc: "DHL致力於提供高品質國際物流，連結全球貿易並引領永續發展。"},
+            { q: "DHL 品牌名稱的由來？", left: "A. Deliver Happiness and Love", right: "B. 三位創辦人的姓氏首字縮寫", correct: "right", desc: "DHL為Adrian Dalsey, Larry Hillblom和Robert Lynn三位創辦人的姓氏縮寫。" },
+            { q: "DHL 的集團目標為？", left: "A. 2030年全面啟用電動車隊", right: "B. 2050年達成淨零碳排目標", correct: "right", desc: "DHL集團目標在2050年達成淨零碳排，目前也已推出永續物流的相關服務。" },
+            { q: "DHL 的品牌主色調？", left: "A.藍色配綠色 ", right: "B. 黃色配紅色", correct: "right", desc: "金黃色象徵DHL的速度，紅色則代表熱情，為DHL的經典品牌色。" }
         ];
 
         let score = 0, timeLeft = 30, gameActive = false, timerPaused = false, questionIndex = 0;
         let currentPackage = null, startX = 0;
 
-        // --- iPhone 強化音訊引擎 ---
-        let audioCtx = null;
-        let isMusicPlaying = false;
-        let nextNoteTime = 0, beat = 0;
+        let audioCtx = null, isMusicPlaying = false, nextNoteTime = 0, beat = 0;
         const tempo = 175;
 
-        // 解鎖 iOS AudioContext 的終極方案
         async function unlockAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -311,7 +310,6 @@
             if (audioCtx.state === 'suspended') {
                 await audioCtx.resume();
             }
-            // 播放一個靜音緩衝
             const buffer = audioCtx.createBuffer(1, 1, 22050);
             const source = audioCtx.createBufferSource();
             source.buffer = buffer;
@@ -321,14 +319,6 @@
 
         const musicBtn = document.getElementById('music-toggle');
         
-        // 使用 touchstart 確保 iOS 識別使用者意圖
-        const handleInteraction = async () => {
-            await unlockAudio();
-            if (!isMusicPlaying && gameActive) {
-                toggleMusic(true);
-            }
-        };
-
         musicBtn.addEventListener('click', () => toggleMusic());
         musicBtn.addEventListener('touchstart', unlockAudio, { passive: true });
 
@@ -375,11 +365,11 @@
             if (isMusicPlaying) setTimeout(scheduler, 25);
         }
 
-        // --- 遊戲邏輯 ---
         const startBtn = document.getElementById('start-btn');
         const nextTaskBtn = document.getElementById('next-task-btn');
         const workArea = document.getElementById('work-area');
         const scoreDisplay = document.getElementById('score');
+        const joinBtn = document.getElementById('join-team-btn');
 
         startBtn.addEventListener('click', async () => {
             await unlockAudio();
@@ -388,6 +378,10 @@
         startBtn.addEventListener('touchstart', unlockAudio, { passive: true });
 
         nextTaskBtn.addEventListener('click', hideExplanation);
+        
+        joinBtn.addEventListener('click', () => {
+            window.open("https://careers.dhl.com/global/en", "_blank");
+        });
 
         function startGame() {
             toggleMusic(true);
@@ -506,10 +500,9 @@
             document.getElementById('game-play').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
             document.getElementById('final-score').innerText = score;
-            let rank = score >= 100 ? "🏆 超級打櫃大師" : (score >= 60 ? "🚚 專業物流人員" : "📦 物流實習生");
+            let rank = score >= 100 ? "🏆 超級打櫃大師" : (score >= 60 ? "🚚 優秀物流專家" : "📦 理貨練習生");
             document.getElementById('rank-text').innerText = rank;
         }
     </script>
 </body>
 </html>
-
