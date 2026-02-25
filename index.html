@@ -64,17 +64,16 @@
             overflow: hidden;
         }
 
-        /* 導引箭頭樣式 - 針對手機優化位置與大小 */
+        /* 導引箭頭樣式 */
         .guide-arrow {
             position: absolute;
-            font-size: 3.5rem; /* 稍微縮小以適應手機 */
+            font-size: 3.5rem;
             font-weight: 900;
             color: rgba(212, 0, 0, 0.35);
             pointer-events: none;
             z-index: 10;
         }
 
-        /* 指向左下櫃子 (A) - 往內收縮至 25% 避免手機邊緣遮擋 */
         .arrow-left { 
             left: 25%; 
             top: 52%;
@@ -86,7 +85,6 @@
             50% { transform: rotate(-135deg) translateY(15px); opacity: 0.7; }
         }
 
-        /* 指向右下櫃子 (B) - 往內收縮至 25% 避免手機邊緣遮擋 */
         .arrow-right { 
             right: 25%; 
             top: 52%;
@@ -96,6 +94,29 @@
         @keyframes bounce-diag-right {
             0%, 100% { transform: rotate(135deg) translateY(0); opacity: 0.3; }
             50% { transform: rotate(135deg) translateY(15px); opacity: 0.7; }
+        }
+
+        /* 手指引導動畫 */
+        #hand-tutorial {
+            position: absolute;
+            bottom: 35%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 4rem;
+            z-index: 200;
+            pointer-events: none;
+            animation: swipe-tutorial 2.5s infinite ease-in-out;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        @keyframes swipe-tutorial {
+            0% { transform: translateX(-50%) translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            30% { transform: translateX(-120%) translateY(20px) rotate(-20deg); }
+            50% { transform: translateX(-50%) translateY(0); }
+            70% { transform: translateX(20%) translateY(20px) rotate(20deg); }
+            90% { opacity: 1; }
+            100% { transform: translateX(-50%) translateY(0); opacity: 0; }
         }
 
         .package {
@@ -279,6 +300,8 @@
                 <!-- 指向櫃子的精準 45 度箭頭 -->
                 <div class="guide-arrow arrow-left">↑</div>
                 <div class="guide-arrow arrow-right">↑</div>
+                <!-- 指示手指 (只在教學時顯示) -->
+                <div id="hand-tutorial" class="hidden">☝️</div>
             </div>
 
             <footer>
@@ -314,7 +337,7 @@
                 <p id="rank-text" class="text-lg font-bold text-yellow-600 mb-4"></p>
                 
                 <p class="text-sm font-bold text-gray-800 bg-yellow-100 py-2 px-3 rounded-lg mb-6 border border-yellow-300 text-center">
-                    🎁 註：截圖或出示此頁面給工作人員，即可兌換小禮物！
+                    🎁 註：出示此頁面給工作人員，即可兌換小禮物！
                 </p>
                 
                 <button onclick="window.location.reload()" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold mb-3 shadow-[0_4px_0_#333] active:translate-y-1 active:shadow-none">再挑戰一次</button>
@@ -328,12 +351,12 @@
             { q: "DHL是在哪裡成立的？", left: "A. 舊金山 (San Francisco)", right: "B. 台北 (Taipei)", correct: "left", desc: "DHL於1969年在舊金山成立，於1973年進入台灣，並在台北設立總公司。" },
             { q: "DHL 主要的業務核心是？", left: "A. 專業國際物流服務", right: "B. 全台連鎖外送點餐平台", correct: "left", desc: "DHL致力於提供高品質國際物流，連結全球貿易並引領永續發展。"},
             { q: "DHL 品牌名稱的由來？", left: "A. Deliver Happiness and Love", right: "B. 三位創辦人的姓氏首字縮寫", correct: "right", desc: "DHL為Adrian Dalsey, Larry Hillblom和Robert Lynn三位創辦人的姓氏縮寫。" },
-            { q: "DHL 的集團目標為？", left: "A. 2030年全面啟用電動車隊", right: "B. 2050年達成淨零碳排目標", correct: "right", desc: "DHL提倡GoGreen，集團目標在2050年達成淨零碳排，目前已有使用電動車隊，也推出永續物流的相關服務。" },
+            { q: "DHL 的集團目標為？", left: "A. 2030年全面啟用電動車隊", right: "B. 2050年達成淨零碳排目標", correct: "right", desc: "DHL提倡GoGreen，集團目標在2050年達成淨零碳排，目前也已推出永續物流的相關服務。" },
             { q: "DHL 的品牌主色調？", left: "A.藍色配綠色 ", right: "B. 黃色配紅色", correct: "right", desc: "金黃色象徵DHL的速度，紅色則代表熱情，為DHL的經典品牌色。" }
         ];
 
         let score = 0, timeLeft = 30, gameActive = false, timerPaused = false, questionIndex = 0;
-        let currentPackage = null, startX = 0;
+        let currentPackage = null, startX = 0, isFirstSwipe = true;
 
         let audioCtx = null, isMusicPlaying = false, nextNoteTime = 0, beat = 0;
         const tempo = 175;
@@ -445,13 +468,27 @@
             document.getElementById('left-label').innerText = data.left;
             document.getElementById('right-label').innerText = data.right;
 
+            // 顯示引導手指 (僅在第一題)
+            const handTut = document.getElementById('hand-tutorial');
+            if (questionIndex === 0 && isFirstSwipe) {
+                handTut.classList.remove('hidden');
+            } else {
+                handTut.classList.add('hidden');
+            }
+
             const pkg = document.createElement('div');
             pkg.className = 'package';
             pkg.innerHTML = `<div class="label-area"><div class="text-base font-black text-gray-800 leading-tight">${data.q}</div></div>`;
             workArea.appendChild(pkg);
             currentPackage = pkg;
 
-            const handleStart = (x) => { unlockAudio(); startX = x; };
+            const handleStart = (x) => { 
+                unlockAudio(); 
+                startX = x; 
+                if (isFirstSwipe) {
+                    handTut.classList.add('hidden');
+                }
+            };
             const handleMove = (x) => {
                 if (!currentPackage || timerPaused) return;
                 const diff = x - startX;
@@ -460,9 +497,13 @@
             const handleEnd = (x) => {
                 if (!currentPackage || timerPaused) return;
                 const diff = x - startX;
-                if (diff < -60) validate('left');
-                else if (diff > 60) validate('right');
-                else {
+                if (diff < -60) {
+                    isFirstSwipe = false;
+                    validate('left');
+                } else if (diff > 60) {
+                    isFirstSwipe = false;
+                    validate('right');
+                } else {
                     currentPackage.style.transition = '0.3s';
                     currentPackage.style.transform = 'translateX(0) rotate(0)';
                 }
