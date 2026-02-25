@@ -64,6 +64,40 @@
             overflow: hidden;
         }
 
+        /* 導引箭頭樣式 */
+        .guide-arrow {
+            position: absolute;
+            font-size: 4rem;
+            font-weight: 900;
+            color: rgba(212, 0, 0, 0.4);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* 指向左下櫃子 (A) - 逆時針旋轉 45 度 */
+        .arrow-left { 
+            left: 20%; 
+            top: 55%;
+            transform: rotate(-135deg); 
+            animation: bounce-diag-left 1.2s infinite; 
+        }
+        @keyframes bounce-diag-left {
+            0%, 100% { transform: rotate(-135deg) translateY(0); opacity: 0.3; }
+            50% { transform: rotate(-135deg) translateY(25px); opacity: 0.8; }
+        }
+
+        /* 指向右下櫃子 (B) - 順時針旋轉 45 度 */
+        .arrow-right { 
+            right: 20%; 
+            top: 55%;
+            transform: rotate(135deg); 
+            animation: bounce-diag-right 1.2s infinite; 
+        }
+        @keyframes bounce-diag-right {
+            0%, 100% { transform: rotate(135deg) translateY(0); opacity: 0.3; }
+            50% { transform: rotate(135deg) translateY(25px); opacity: 0.8; }
+        }
+
         .package {
             width: 220px; 
             min-height: 160px; 
@@ -109,7 +143,7 @@
         }
 
         footer {
-            height: 200px;
+            height: 180px;
             width: 100%;
             display: flex;
             justify-content: space-between;
@@ -122,12 +156,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 48%;
+            width: 46%;
         }
 
         .pallet-container {
             width: 100%;
-            height: 80px;
+            height: 70px;
             background: rgba(255, 255, 255, 0.4);
             border: 3px solid #D40000;
             border-top: none;
@@ -164,17 +198,14 @@
             text-align: center;
             font-weight: 900;
             color: #D40000;
-            font-size: 0.8rem;
-            line-height: 1.3;
+            font-size: 0.85rem;
+            line-height: 1.2;
             background: white;
             padding: 5px 8px;
             border: 2px solid #D40000;
             border-radius: 10px;
             margin-bottom: 4px;
             box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
-            white-space: normal; 
-            word-wrap: break-word;
-            overflow: visible;
         }
 
         #timer-bar {
@@ -219,7 +250,7 @@
     <div id="game-container">
         <!-- 開始畫面 -->
         <div id="start-screen" class="w-full h-full flex flex-col items-center justify-center p-6 z-[200] absolute bg-[#FFCC00]">
-            <h1 class="text-4xl font-black dhl-red mb-1 italic">DHL EXPRESS</h1>
+            <h1 class="text-4xl font-black dhl-red mb-1 italic text-center">DHL EXPRESS</h1>
             <h2 class="text-xl font-bold mb-8 text-gray-800">專業打櫃挑戰賽</h2>
             <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-xs w-full text-center border-4 border-black">
                 <div class="w-16 h-12 bg-[#FFCC00] mx-auto mb-6 border-2 border-black relative flex items-center justify-center rounded">
@@ -228,7 +259,7 @@
                 <p class="text-base text-gray-700 mb-8 font-bold leading-relaxed text-left">
                     📏 <b>規則說明：</b><br>
                     1. 觀察包裹上的問題。<br>
-                    2. 依據正確答案<b>向左滑</b>投入A櫃，<b>向右滑</b>投入B櫃。<br>
+                    2. 依據正確答案<b class="dhl-red text-lg">向左滑</b>投入A櫃，<b class="dhl-red text-lg">向右滑</b>投入B櫃。<br>
                     3. 挑戰在 30 秒內完美打櫃！
                 </p>
                 <button id="start-btn" class="w-full bg-dhl-red text-white py-4 rounded-2xl text-xl font-bold shadow-[0_5px_0_#990000] active:translate-y-1 active:shadow-none">
@@ -244,7 +275,11 @@
                 <div id="score" class="text-3xl font-black dhl-red">0</div>
             </header>
 
-            <div id="work-area"></div>
+            <div id="work-area">
+                <!-- 指向櫃子的精準 45 度箭頭 -->
+                <div class="guide-arrow arrow-left">↑</div>
+                <div class="guide-arrow arrow-right">↑</div>
+            </div>
 
             <footer>
                 <div class="pallet-wrap">
@@ -278,8 +313,8 @@
                 <div id="final-score" class="text-6xl font-black mb-2 dhl-red">0</div>
                 <p id="rank-text" class="text-lg font-bold text-yellow-600 mb-4"></p>
                 
-                <p class="text-sm font-bold text-gray-800 bg-yellow-100 py-2 px-3 rounded-lg mb-6 border border-yellow-300">
-                    🎁 註：出示此頁面給工作人員，即可兌換小禮物！
+                <p class="text-sm font-bold text-gray-800 bg-yellow-100 py-2 px-3 rounded-lg mb-6 border border-yellow-300 text-center">
+                    🎁 註：截圖或出示此頁面給工作人員，即可兌換小禮物！
                 </p>
                 
                 <button onclick="window.location.reload()" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold mb-3 shadow-[0_4px_0_#333] active:translate-y-1 active:shadow-none">再挑戰一次</button>
@@ -290,10 +325,10 @@
 
     <script>
         const questions = [
-            { q: "DHL是在哪裡成立的？", left: "A. 舊金山 (San Francisco)", right: "B. 台北 (Taipei)", correct: "left", desc: "DHL於1969年在舊金山成立，於1973年進入台灣，並在台北設立總公司；而後於2002年被德國郵政集團收購，轉為德國公司。" },
+            { q: "DHL是在哪裡成立的？", left: "A. 舊金山 (San Francisco)", right: "B. 台北 (Taipei)", correct: "left", desc: "DHL於1969年在舊金山成立，於1973年進入台灣，並在台北設立總公司。" },
             { q: "DHL 主要的業務核心是？", left: "A. 專業國際物流服務", right: "B. 全台連鎖外送點餐平台", correct: "left", desc: "DHL致力於提供高品質國際物流，連結全球貿易並引領永續發展。"},
             { q: "DHL 品牌名稱的由來？", left: "A. Deliver Happiness and Love", right: "B. 三位創辦人的姓氏首字縮寫", correct: "right", desc: "DHL為Adrian Dalsey, Larry Hillblom和Robert Lynn三位創辦人的姓氏縮寫。" },
-            { q: "DHL 的集團目標為？", left: "A. 2030年全面啟用電動車隊", right: "B. 2050年達成淨零碳排目標", correct: "right", desc: "DHL集團目標在2050年達成淨零碳排，目前也已推出永續物流的相關服務。" },
+            { q: "DHL 的集團目標為？", left: "A. 2030年全面啟用電動車隊", right: "B. 2050年達成淨零碳排目標", correct: "right", desc: "DHL提倡GoGreen，集團目標在2050年達成淨零碳排，目前已有電動車隊，也推出永續物流的相關服務。" },
             { q: "DHL 的品牌主色調？", left: "A.藍色配綠色 ", right: "B. 黃色配紅色", correct: "right", desc: "金黃色象徵DHL的速度，紅色則代表熱情，為DHL的經典品牌色。" }
         ];
 
@@ -506,4 +541,3 @@
     </script>
 </body>
 </html>
-
