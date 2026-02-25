@@ -64,38 +64,38 @@
             overflow: hidden;
         }
 
-        /* 導引箭頭樣式 */
+        /* 導引箭頭樣式 - 針對手機優化位置與大小 */
         .guide-arrow {
             position: absolute;
-            font-size: 4rem;
+            font-size: 3.5rem; /* 稍微縮小以適應手機 */
             font-weight: 900;
-            color: rgba(212, 0, 0, 0.4);
+            color: rgba(212, 0, 0, 0.35);
             pointer-events: none;
             z-index: 10;
         }
 
-        /* 指向左下櫃子 (A) - 逆時針旋轉 45 度 */
+        /* 指向左下櫃子 (A) - 往內收縮至 25% 避免手機邊緣遮擋 */
         .arrow-left { 
-            left: 20%; 
-            top: 55%;
+            left: 25%; 
+            top: 52%;
             transform: rotate(-135deg); 
             animation: bounce-diag-left 1.2s infinite; 
         }
         @keyframes bounce-diag-left {
             0%, 100% { transform: rotate(-135deg) translateY(0); opacity: 0.3; }
-            50% { transform: rotate(-135deg) translateY(25px); opacity: 0.8; }
+            50% { transform: rotate(-135deg) translateY(15px); opacity: 0.7; }
         }
 
-        /* 指向右下櫃子 (B) - 順時針旋轉 45 度 */
+        /* 指向右下櫃子 (B) - 往內收縮至 25% 避免手機邊緣遮擋 */
         .arrow-right { 
-            right: 20%; 
-            top: 55%;
+            right: 25%; 
+            top: 52%;
             transform: rotate(135deg); 
             animation: bounce-diag-right 1.2s infinite; 
         }
         @keyframes bounce-diag-right {
             0%, 100% { transform: rotate(135deg) translateY(0); opacity: 0.3; }
-            50% { transform: rotate(135deg) translateY(25px); opacity: 0.8; }
+            50% { transform: rotate(135deg) translateY(15px); opacity: 0.7; }
         }
 
         .package {
@@ -328,7 +328,7 @@
             { q: "DHL是在哪裡成立的？", left: "A. 舊金山 (San Francisco)", right: "B. 台北 (Taipei)", correct: "left", desc: "DHL於1969年在舊金山成立，於1973年進入台灣，並在台北設立總公司。" },
             { q: "DHL 主要的業務核心是？", left: "A. 專業國際物流服務", right: "B. 全台連鎖外送點餐平台", correct: "left", desc: "DHL致力於提供高品質國際物流，連結全球貿易並引領永續發展。"},
             { q: "DHL 品牌名稱的由來？", left: "A. Deliver Happiness and Love", right: "B. 三位創辦人的姓氏首字縮寫", correct: "right", desc: "DHL為Adrian Dalsey, Larry Hillblom和Robert Lynn三位創辦人的姓氏縮寫。" },
-            { q: "DHL 的集團目標為？", left: "A. 2030年全面啟用電動車隊", right: "B. 2050年達成淨零碳排目標", correct: "right", desc: "DHL提倡GoGreen，集團目標在2050年達成淨零碳排，目前已有電動車隊，也推出永續物流的相關服務。" },
+            { q: "DHL 的集團目標為？", left: "A. 2030年全面啟用電動車隊", right: "B. 2050年達成淨零碳排目標", correct: "right", desc: "DHL提倡GoGreen，集團目標在2050年達成淨零碳排，目前已有使用電動車隊，也推出永續物流的相關服務。" },
             { q: "DHL 的品牌主色調？", left: "A.藍色配綠色 ", right: "B. 黃色配紅色", correct: "right", desc: "金黃色象徵DHL的速度，紅色則代表熱情，為DHL的經典品牌色。" }
         ];
 
