@@ -64,36 +64,36 @@
             overflow: hidden;
         }
 
-        /* 導引箭頭樣式 */
+        /* 導引箭頭樣式 - 調整位置至下方並確保在最上層 */
         .guide-arrow {
             position: absolute;
             font-size: 3.5rem;
             font-weight: 900;
-            color: rgba(212, 0, 0, 0.35);
+            color: rgba(212, 0, 0, 0.5);
             pointer-events: none;
-            z-index: 10;
+            z-index: 200; /* 提升層級，確保在包裹上方 */
         }
 
         .arrow-left { 
-            left: 25%; 
-            top: 52%;
+            left: 20%; 
+            bottom: 10%; /* 調低位置 */
             transform: rotate(-135deg); 
             animation: bounce-diag-left 1.2s infinite; 
         }
         @keyframes bounce-diag-left {
-            0%, 100% { transform: rotate(-135deg) translateY(0); opacity: 0.3; }
-            50% { transform: rotate(-135deg) translateY(15px); opacity: 0.7; }
+            0%, 100% { transform: rotate(-135deg) translateY(0); opacity: 0.4; }
+            50% { transform: rotate(-135deg) translateY(15px); opacity: 0.8; }
         }
 
         .arrow-right { 
-            right: 25%; 
-            top: 52%;
+            right: 20%; 
+            bottom: 10%; /* 調低位置 */
             transform: rotate(135deg); 
             animation: bounce-diag-right 1.2s infinite; 
         }
         @keyframes bounce-diag-right {
-            0%, 100% { transform: rotate(135deg) translateY(0); opacity: 0.3; }
-            50% { transform: rotate(135deg) translateY(15px); opacity: 0.7; }
+            0%, 100% { transform: rotate(135deg) translateY(0); opacity: 0.4; }
+            50% { transform: rotate(135deg) translateY(15px); opacity: 0.8; }
         }
 
         /* 手指引導動畫 */
@@ -103,7 +103,7 @@
             left: 50%;
             transform: translateX(-50%);
             font-size: 4rem;
-            z-index: 200;
+            z-index: 300;
             pointer-events: none;
             animation: swipe-tutorial 2.5s infinite ease-in-out;
             text-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -337,7 +337,7 @@
                 <p id="rank-text" class="text-lg font-bold text-yellow-600 mb-4"></p>
                 
                 <p class="text-sm font-bold text-gray-800 bg-yellow-100 py-2 px-3 rounded-lg mb-6 border border-yellow-300 text-center">
-                    🎁 註：出示此頁面給工作人員，即可兌換小禮物！
+                    🎁 註：截圖或出示此頁面給工作人員，即可兌換小禮物！
                 </p>
                 
                 <button onclick="window.location.reload()" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold mb-3 shadow-[0_4px_0_#333] active:translate-y-1 active:shadow-none">再挑戰一次</button>
@@ -351,7 +351,7 @@
             { q: "DHL是在哪裡成立的？", left: "A. 舊金山 (San Francisco)", right: "B. 台北 (Taipei)", correct: "left", desc: "DHL於1969年在舊金山成立，於1973年進入台灣，並在台北設立總公司。" },
             { q: "DHL 主要的業務核心是？", left: "A. 專業國際物流服務", right: "B. 全台連鎖外送點餐平台", correct: "left", desc: "DHL致力於提供高品質國際物流，連結全球貿易並引領永續發展。"},
             { q: "DHL 品牌名稱的由來？", left: "A. Deliver Happiness and Love", right: "B. 三位創辦人的姓氏首字縮寫", correct: "right", desc: "DHL為Adrian Dalsey, Larry Hillblom和Robert Lynn三位創辦人的姓氏縮寫。" },
-            { q: "DHL 的集團目標為？", left: "A. 2030年全面啟用電動車隊", right: "B. 2050年達成淨零碳排目標", correct: "right", desc: "DHL提倡GoGreen，集團目標在2050年達成淨零碳排，目前也已推出永續物流的相關服務。" },
+            { q: "DHL 的集團目標為？", left: "A. 2030年全面啟用電動車隊", right: "B. 2050年達成淨零碳排目標", correct: "right", desc: "DHL提倡GoGreen，目前已部分使用電動車隊，集團目標為2025年達到零碳排，也推出永續物流的相關服務。" },
             { q: "DHL 的品牌主色調？", left: "A.藍色配綠色 ", right: "B. 黃色配紅色", correct: "right", desc: "金黃色象徵DHL的速度，紅色則代表熱情，為DHL的經典品牌色。" }
         ];
 
