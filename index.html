@@ -279,7 +279,6 @@
         <!-- 答案解析畫面 -->
         <div id="explanation-overlay" class="hidden">
             <div class="bg-white w-full max-w-sm rounded-3xl border-4 border-black p-6 shadow-2xl">
-                <!-- 修正標題為純「正確」或「錯誤」 -->
                 <div id="result-indicator" class="text-2xl font-black mb-3 italic">正確</div>
                 <div class="h-1 bg-gray-100 mb-4"></div>
                 <p id="explanation-text" class="text-gray-700 text-sm font-medium leading-relaxed mb-6"></p>
@@ -300,7 +299,10 @@
                     🎁 註：出示此頁面給工作人員，即可兌換小禮物！
                 </p>
                 <button onclick="window.location.reload()" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold mb-3 shadow-[0_4px_0_#333] active:translate-y-1 active:shadow-none">再挑戰一次</button>
-                <button id="join-team-btn" class="w-full bg-dhl-red text-white py-3 rounded-xl font-bold shadow-[0_4px_0_#990000] active:translate-y-1 active:shadow-none">加入 DHL 卓越團隊</button>
+                <!-- 更新為跳轉網址的按鈕 -->
+                <button id="join-team-btn" onclick="window.open('https://careers.dhl.com/apac/tw', '_blank')" class="w-full bg-dhl-red text-white py-3 rounded-xl font-bold shadow-[0_4px_0_#990000] active:translate-y-1 active:shadow-none">
+                    加入 DHL 卓越團隊
+                </button>
             </div>
         </div>
     </div>
@@ -509,7 +511,6 @@
 
         function showExp(isCorrect, text) {
             const ind = document.getElementById('result-indicator');
-            // 修改此處，純粹顯示「正確」或「錯誤」
             ind.innerText = isCorrect ? "正確" : "錯誤";
             ind.className = isCorrect ? "text-2xl font-black mb-2 text-green-600 italic" : "text-2xl font-black mb-2 text-red-600 italic";
             document.getElementById('explanation-text').innerText = text;
