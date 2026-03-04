@@ -274,7 +274,7 @@
                     <p class="text-center mb-2">📏 <b>規則說明：</b></p>
                     <p>1. 觀察包裹上的問題。</p>
                     <p>2. 依據正確答案<b class="text-red-600 font-black">向左滑</b>投入A櫃，<b class="text-red-600 font-black">向右滑</b>投入B櫃。</p>
-                    <p>3. 挑戰在 30 秒內完美打櫃！</p>
+                    <p>3. 挑戰在 <b class="text-red-600 font-black">1 分鐘</b> 內完美打櫃！</p>
                 </div>
                 <button id="start-btn" class="w-full bg-dhl-red text-white py-4 rounded-2xl text-xl font-bold shadow-[0_5px_0_#990000] active:translate-y-1 active:shadow-none">
                     啟動任務
@@ -336,13 +336,14 @@
     <script>
         const questions = [
             { q: "DHL是在哪裡成立的？", left: "A. 舊金山 (San Francisco)", right: "B. 台北 (Taipei)", correct: "left", desc: "DHL於1969年在舊金山成立，於1973年進入台灣，並在台北設立總公司。" },
-            { q: "DHL 主要的業務核心是？", left: "A. 專業國際物流服務", right: "B. 全台連鎖外送點餐平台", correct: "left", desc: "DHL致力於提供高品質國際物流，連結全球貿易並引領永續發展。"},
+            { q: "DHL 主要的業務核心是？", left: "A. 專業國際物流服務", right: "B. 全台連鎖外送點餐平台", correct: "left", desc: "DHL致力於提供高品質國際物流，連結全球貿易並引領永續發展. "},
             { q: "DHL 品牌名稱的由來？", left: "A. Deliver Happiness and Love", right: "B. 三位創辦人的姓氏首字縮寫", correct: "right", desc: "DHL為Adrian Dalsey, Larry Hillblom和Robert Lynn三位創辦人的姓氏縮寫。" },
             { q: "DHL 的集團目標為？", left: "A. 2030年全面啟用電動車隊", right: "B. 2050年達成淨零碳排目標", correct: "right", desc: "DHL提倡GoGreen，集團目標在2050年達成淨零碳排，目前也已推出永續物流的相關服務。" },
             { q: "DHL 的品牌主色調？", left: "A. 藍色配綠色", right: "B. 黃色配紅色", correct: "right", desc: "金黃色象徵DHL的速度，紅色則代表熱情，為DHL的經典品牌色。" }
         ];
 
-        let score = 0, timeLeft = 30, gameActive = false, timerPaused = false, questionIndex = 0;
+        let score = 0, timeLeft = 60, gameActive = false, timerPaused = false, questionIndex = 0;
+        const totalGameTime = 60; // 總遊戲時間設定為 60 秒
         let currentPackage = null, startX = 0, isProcessing = false, hasSwipedOnce = false;
 
         let audioCtx = null, isMusicPlaying = false, nextNoteTime = 0, beat = 0;
@@ -430,7 +431,7 @@
                 if (!gameActive) { clearInterval(itv); return; }
                 if (!timerPaused) {
                     timeLeft -= 0.1;
-                    tb.style.width = (timeLeft / 30 * 100) + '%';
+                    tb.style.width = (timeLeft / totalGameTime * 100) + '%';
                     if (timeLeft <= 0) endGame();
                 }
             }, 100);
