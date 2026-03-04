@@ -81,7 +81,6 @@
             text-align: center;
             pointer-events: auto;
             cursor: grab;
-            /* 預設引導動畫：暗示可以左右滑動 */
             animation: guide-slide 2.5s infinite ease-in-out;
         }
 
@@ -89,6 +88,35 @@
             0%, 100% { transform: translateX(0) rotate(0); }
             25% { transform: translateX(-20px) rotate(-2deg); }
             75% { transform: translateX(20px) rotate(2deg); }
+        }
+
+        /* 浮動手勢提示文字 - 更新為牛皮紙風格與透明感 */
+        #swipe-hint {
+            position: absolute;
+            top: -65px;
+            left: 50%;
+            transform: translateX(-50%);
+            /* 牛皮紙色背景，帶有 85% 透明度 */
+            background: rgba(195, 155, 110, 0.85); 
+            color: #3d2b1f; /* 深啡色文字 */
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 15px;
+            white-space: nowrap;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 110;
+            border: 1px solid rgba(139, 101, 57, 0.4); /* 微弱的邊框線 */
+            animation: bounce-y 1s infinite alternate;
+        }
+
+        @keyframes bounce-y {
+            from { transform: translate(-50%, 0); }
+            to { transform: translate(-50%, -10px); }
         }
 
         .package::after {
@@ -133,7 +161,7 @@
             align-items: center;
             width: 47%;
             transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            pointer-events: none; /* 強制拖曳，不允許點擊標籤 */
+            pointer-events: none; 
         }
 
         .pallet-container {
@@ -186,7 +214,6 @@
             transition: all 0.2s ease;
         }
 
-        /* 靠近目標時的高亮效果 */
         .pallet-wrap.target-active {
             transform: scale(1.1);
         }
@@ -299,7 +326,6 @@
                     🎁 註：出示此頁面給工作人員，即可兌換小禮物！
                 </p>
                 <button onclick="window.location.reload()" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold mb-3 shadow-[0_4px_0_#333] active:translate-y-1 active:shadow-none">再挑戰一次</button>
-                <!-- 更新為跳轉網址的按鈕 -->
                 <button id="join-team-btn" onclick="window.open('https://careers.dhl.com/apac/tw', '_blank')" class="w-full bg-dhl-red text-white py-3 rounded-xl font-bold shadow-[0_4px_0_#990000] active:translate-y-1 active:shadow-none">
                     加入 DHL 卓越團隊
                 </button>
@@ -317,7 +343,7 @@
         ];
 
         let score = 0, timeLeft = 30, gameActive = false, timerPaused = false, questionIndex = 0;
-        let currentPackage = null, startX = 0, isProcessing = false;
+        let currentPackage = null, startX = 0, isProcessing = false, hasSwipedOnce = false;
 
         let audioCtx = null, isMusicPlaying = false, nextNoteTime = 0, beat = 0;
         const tempo = 175;
@@ -420,18 +446,36 @@
 
             const pkg = document.createElement('div');
             pkg.className = 'package';
-            pkg.innerHTML = `<div class="label-area"><div class="text-base font-black text-gray-800 leading-tight">${data.q}</div></div>`;
+            
+            // 加入提示文字
+            let hintHTML = '';
+            if (!hasSwipedOnce && questionIndex === 0) {
+                hintHTML = `<div id="swipe-hint">⬅️ 請左右滑動箱子 ➡️</div>`;
+            }
+
+            pkg.innerHTML = `${hintHTML}<div class="label-area"><div class="text-base font-black text-gray-800 leading-tight">${data.q}</div></div>`;
             workArea.appendChild(pkg);
             currentPackage = pkg;
 
             const wrapL = document.getElementById('wrap-left');
             const wrapR = document.getElementById('wrap-right');
 
+            const removeHint = () => {
+                const hint = document.getElementById('swipe-hint');
+                if (hint) {
+                    hint.style.opacity = '0';
+                    hint.style.transition = 'opacity 0.3s';
+                    setTimeout(() => hint.remove(), 300);
+                    hasSwipedOnce = true;
+                }
+            };
+
             const handleStart = (x) => { 
                 if (isProcessing) return;
                 unlockAudio(); 
                 startX = x; 
                 pkg.style.animation = 'none'; 
+                removeHint(); 
             };
             
             const handleMove = (x) => {
