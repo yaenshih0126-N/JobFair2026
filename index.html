@@ -90,7 +90,7 @@
             75% { transform: translateX(20px) rotate(2deg); }
         }
 
-        /* 浮動手勢提示文字 - 更新為牛皮紙風格與透明感 */
+        /* 浮動手勢提示文字 - 牛皮紙風格與透明感 */
         #swipe-hint {
             position: absolute;
             top: -65px;
@@ -325,8 +325,8 @@
                 <p class="text-sm font-bold text-gray-800 bg-yellow-100 py-2 px-3 rounded-lg mb-6 border border-yellow-300 text-center">
                     🎁 註：出示此頁面給工作人員，即可兌換小禮物！
                 </p>
-                <button onclick="window.location.reload()" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold mb-3 shadow-[0_4px_0_#333] active:translate-y-1 active:shadow-none">再挑戰一次</button>
-                <button id="join-team-btn" onclick="window.open('https://careers.dhl.com/apac/tw', '_blank')" class="w-full bg-dhl-red text-white py-3 rounded-xl font-bold shadow-[0_4px_0_#990000] active:translate-y-1 active:shadow-none">
+                <button id="retry-btn" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold mb-3 shadow-[0_4px_0_#333] active:translate-y-1 active:shadow-none">再挑戰一次</button>
+                <button id="join-team-btn" class="w-full bg-dhl-red text-white py-3 rounded-xl font-bold shadow-[0_4px_0_#990000] active:translate-y-1 active:shadow-none">
                     加入 DHL 卓越團隊
                 </button>
             </div>
@@ -336,8 +336,8 @@
     <script>
         const questions = [
             { q: "DHL的總部在哪個國家？", left: "A. 日本", right: "B. 德國", correct: "right", desc: "DHL的集團總部位於德國波昂(Bonn)。" },
-            { q: "DHL主要的業務核心是？", left: "A. 專業國際物流服務", right: "B. 全台連鎖外送點餐平台", correct: "left", desc: "DHL致力於提供高品質國際物流，連結全球貿易並引領永續發展。"},
-            { q: "DHL的企業使命是？", left: "A. 使命必達 ", right: "B. 連結人群，改善生活", correct: "right", desc: ""Connecting people, improving lives"（連結人群、改善生活）是 DHL 集團的核心企業使命。不僅強調物流核心業務，更致力於回饋社會。" },
+            { q: "DHL主要的業務核心是？", left: "A. 專業國際物流服務", right: "B. 全台連鎖外送點餐平台", correct: "left", desc: "DHL致力於提供高品質國際物流，連結全球貿易並引領永續發展。" },
+            { q: "DHL的企業使命是？", left: "A. 使命必達 ", right: "B. 連結人群，改善生活", correct: "right", desc: "“Connecting people, improving lives”（連結人群、改善生活）是 DHL 集團的核心企業使命。不僅強調物流核心業務，更致力於回饋社會。" },
             { q: "DHL的集團目標為？", left: "A. 2030年全面啟用電動車隊", right: "B. 2050年達成淨零碳排目標", correct: "right", desc: "DHL提倡GoGreen，集團目標在2050年達成淨零碳排，目前也已推出永續物流的相關服務。" },
             { q: "DHL的品牌主色調？", left: "A. 藍色配綠色", right: "B. 黃色配紅色", correct: "right", desc: "金黃色象徵DHL的速度，紅色則代表熱情，為DHL的經典品牌色。" }
         ];
@@ -359,7 +359,54 @@
         }
 
         const musicBtn = document.getElementById('music-toggle');
-        musicBtn.addEventListener('click', () => toggleMusic());
+        const startBtn = document.getElementById('start-btn');
+        const nextTaskBtn = document.getElementById('next-task-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const joinBtn = document.getElementById('join-team-btn');
+        const workArea = document.getElementById('work-area');
+        const scoreDisplay = document.getElementById('score');
+
+        // 雙重事件綁定，解決手機 touch-action: none 時點擊無效的行為
+        const triggerStart = async (e) => {
+            if (e) e.preventDefault();
+            await unlockAudio();
+            startGame();
+        };
+        startBtn.addEventListener('click', triggerStart);
+        startBtn.addEventListener('touchstart', triggerStart, { passive: false });
+
+        const triggerNext = (e) => {
+            if (e) e.preventDefault();
+            hideExplanation();
+        };
+        nextTaskBtn.addEventListener('click', triggerNext);
+        nextTaskBtn.addEventListener('touchstart', triggerNext, { passive: false });
+
+        const triggerRetry = (e) => {
+            if (e) e.preventDefault();
+            window.location.reload();
+        };
+        if (retryBtn) {
+            retryBtn.addEventListener('click', triggerRetry);
+            retryBtn.addEventListener('touchstart', triggerRetry, { passive: false });
+        }
+
+        const triggerJoin = (e) => {
+            if (e) e.preventDefault();
+            window.open('https://careers.dhl.com/apac/tw', '_blank');
+        };
+        if (joinBtn) {
+            joinBtn.addEventListener('click', triggerJoin);
+            joinBtn.addEventListener('touchstart', triggerJoin, { passive: false });
+        }
+
+        const triggerMusic = async (e) => {
+            if (e) e.preventDefault();
+            await unlockAudio();
+            toggleMusic();
+        };
+        musicBtn.addEventListener('click', triggerMusic);
+        musicBtn.addEventListener('touchstart', triggerMusic, { passive: false });
 
         function toggleMusic(force = null) {
             isMusicPlaying = force !== null ? force : !isMusicPlaying;
@@ -403,18 +450,6 @@
             }
             if (isMusicPlaying) setTimeout(scheduler, 25);
         }
-
-        const startBtn = document.getElementById('start-btn');
-        const nextTaskBtn = document.getElementById('next-task-btn');
-        const workArea = document.getElementById('work-area');
-        const scoreDisplay = document.getElementById('score');
-
-        startBtn.addEventListener('click', async () => {
-            await unlockAudio();
-            startGame();
-        });
-
-        nextTaskBtn.addEventListener('click', hideExplanation);
 
         function startGame() {
             toggleMusic(true);
@@ -590,5 +625,3 @@
     </script>
 </body>
 </html>
-
-
